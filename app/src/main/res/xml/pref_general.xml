@@ -1,0 +1,48 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="enable_service"
+        android:summary="@string/pref_description_news_bar"
+        android:title="@string/pref_title_news_bar" />
+
+    <ListPreference
+        android:defaultValue="-1"
+        android:entries="@array/pref_new_bar_lang_list_titles"
+        android:entryValues="@array/pref_new_bar_lang_list_values"
+        android:key="new_bar_lang"
+        android:summary="%s"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_new_bar_lang" />
+
+    <MultiSelectListPreference
+        android:dialogTitle="@string/pref_title_news_resources"
+        android:key="new_bar_resources"
+        android:title="@string/pref_title_news_resources"
+        android:entries="@array/pref_news_resources_titles"
+        android:entryValues="@array/pref_news_resources_values"
+        android:defaultValue="@array/empty_array"
+        android:persistent="true"
+        />
+
+
+    <ListPreference
+        android:defaultValue="-1"
+        android:entries="@array/pref_refresh_news_delay_list_titles"
+        android:entryValues="@array/pref_refresh_news_delay_list_values"
+        android:key="new_bar_refresh_delay"
+        android:summary="%s"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_refresh_news_delay" />
+
+    <ListPreference
+        android:defaultValue="-1"
+        android:entries="@array/pref_news_bar_display_position_list_titles"
+        android:entryValues="@array/pref_news_bar_display_position_list_values"
+        android:key="news_bar_display_position"
+        android:summary="%s"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_news_bar_display_position" />
+</PreferenceScreen>
