@@ -17,16 +17,18 @@
     <string name="pref_resource_news_bar" >Select RSS News resources </string>
     <string name="pref_title_news_resources"> News Resources </string>
     <string-array name="pref_news_resources_titles">
-        <item>CNN</item>
-        <item>JAZZERA</item>
-        <item>BBC</item>
-        <item>Fr24</item>
+        <item>CNN News</item>
+        <item>Al Jazeera</item>
+        <item>BBC News</item>
+        <item>France 24</item>
+        <item>New ...</item>
     </string-array>
     <string-array name="pref_news_resources_values">
         <item>0</item>
         <item>1</item>
         <item>2</item>
         <item>3</item>
+        <item>4</item>
     </string-array>
 
     <string-array name="empty_array"/>

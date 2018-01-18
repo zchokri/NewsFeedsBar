@@ -80,6 +80,8 @@ public class MyService extends Service implements OnClickListener {
     private int step = 0;
     private int screenBarPosition = 0;
     public int mLanguageId = 0;
+    public int mSpeedBar = 0;
+    public int currentSpeed = 0;
     String rssResult = "";
     int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 10001;
     SharedPreferences defaultSharedPreferences = null;
@@ -167,6 +169,7 @@ public class MyService extends Service implements OnClickListener {
             p.gravity = Gravity.BOTTOM;
         }
 
+        mSpeedBar  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_speed","0"));
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         layoutInflater =
@@ -283,6 +286,7 @@ public class MyService extends Service implements OnClickListener {
     public void startAutoScroll() {
         DisplayMetrics displaymetrics = getApplicationContext().getResources().getDisplayMetrics();
         int screenWidth = displaymetrics.widthPixels;
+
         if(mLanguageId != 0) {
             //fr en
             mStartingPosition = 0;
@@ -292,6 +296,25 @@ public class MyService extends Service implements OnClickListener {
             //ar
             mStartingPosition =  horizontalScrollView.getChildAt(0).getMeasuredWidth() - screenWidth;
             step = -10;
+        }
+
+        switch (mSpeedBar)
+        {
+            case 0:
+                currentSpeed = 200;
+                break;
+            case 1:
+                currentSpeed = 100;
+                break;
+            case 2:
+                currentSpeed = 50;
+                break;
+            case 3:
+                currentSpeed = 20;
+                break;
+            case 4:
+                currentSpeed = 10;
+                break;
         }
         //ar
         //final int diff =  horizontalScrollView.getChildAt(0).getMeasuredWidth() - screenWidth;
@@ -316,7 +339,7 @@ public class MyService extends Service implements OnClickListener {
 
 
             }
-        }, 30);
+        }, currentSpeed);
 
     }
 

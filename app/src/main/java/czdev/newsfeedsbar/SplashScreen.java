@@ -169,6 +169,7 @@ public class SplashScreen extends Activity {
             }else{
                 Log.v("App","OS Version Less than M");
                 //No need for Permission as less then M OS.
+                startSplashScreen();
             }
 
 

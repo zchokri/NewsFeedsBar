@@ -77,7 +77,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 multiSelectListPreference.setSummary(""+stringValue);
             }
 
-            if(preference.getKey().equals("news_bar_display_position")) {
+            if(preference.getKey().equals("news_bar_display_position") ||
+                    preference.getKey().equals("new_bar_lang") ||
+                    preference.getKey().equals("news_bar_display_speed")) {
                 Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
                 if (NewsFeedsBar.getServiceNewsStatus()) {
                     NewsFeedsBar.stopServiceNews();
@@ -239,6 +241,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             checkBoxPreference.setChecked(NewsFeedsBar.getServiceNewsStatus());
             bindPreferenceSummaryToBooleanValue(findPreference("enable_service"));
             bindPreferenceSummaryToValue(findPreference("news_bar_display_position"));
+            bindPreferenceSummaryToValue(findPreference("news_bar_display_speed"));
+
+
         }
 
         @Override

@@ -239,8 +239,6 @@ public class NewsFeedsBar extends AppCompatActivity {
         setContentView(R.layout.activity_news_feeds_bar);
     }
 
-
-
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -250,7 +248,6 @@ public class NewsFeedsBar extends AppCompatActivity {
         }
         return false;
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
