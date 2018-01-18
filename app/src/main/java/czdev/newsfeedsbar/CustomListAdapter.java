@@ -59,9 +59,18 @@ public class CustomListAdapter  extends BaseAdapter {
         holder.titleView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
         holder.descView.setText(feedMessage.getDescription());
        // int imageId = this.getMipmapResIdByName();
-        holder.flagView.setImageResource(R.drawable.cnn2);
+        if(feedMessage.getLink().contains("cnn")) {
+            holder.flagView.setImageResource(R.drawable.cnn2);
+        }else if(feedMessage.getLink().contains("cnn"))
+            {
+            holder.flagView.setImageResource(R.drawable.f24);
 
-        return convertView;
+        } if(feedMessage.getLink().contains("jaze")) {
+            holder.flagView.setImageResource(R.drawable.jsc);
+
+        }
+
+            return convertView;
     }
 
     // Find Image ID corresponding to the name of the image (in the directory mipmap).

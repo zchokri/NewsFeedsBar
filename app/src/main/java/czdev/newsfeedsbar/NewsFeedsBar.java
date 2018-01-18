@@ -53,6 +53,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.sun.org.apache.regexp.internal.RE;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -63,19 +64,17 @@ import static android.content.Context.MODE_PRIVATE;
 public class NewsFeedsBar extends AppCompatActivity {
 
     public static String TAG_LOG = "NewsBar";
-    public static final String FEED_PREFS_NAME = "FEED_PREFS";
-    SharedPreferences mPrefs;
     NotificationCompat.Builder mBuilder;
     public static FloatingActionButton fab;
     int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 10001;
     String rssResult = "";
     Animation animSideDown;
-    public static Feed feed;
     private boolean isPaused = false;
     public int  mRefreshDelay = 0;
     public int  mLanguageId= 0;
     public Set<String> mRessources = null;
     public int mPosition = 0;
+    public Feed currentFeed;
 
     public static  Context mContext = null;
     public static SharedPreferences sharedPreferences = null;
@@ -91,19 +90,13 @@ public class NewsFeedsBar extends AppCompatActivity {
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         Log.d(TAG_LOG, "News Bar Running! " + isMyServiceRunning(MyService.class));
-        feed = SplashScreen.getFeed();
-        if(feed == null) {
-            mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
-            Gson gson = new Gson();
-            String json = mPrefs.getString("SerializableObject", "");
-            feed = gson.fromJson(json, Feed.class);
-        }
+        currentFeed = SplashScreen.retrieveFeedTask.getFeed();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if(feed != null) {
-            System.out.println(feed);
-            for (FeedMessage message : feed.getMessages()) {
+        if(currentFeed != null) {
+            System.out.println(currentFeed);
+            for (FeedMessage message : currentFeed.getMessages()) {
                 System.out.println(message);
                 rssResult += message.getTitle();
                 rssResult += " ~[~]~ ";
@@ -111,7 +104,7 @@ public class NewsFeedsBar extends AppCompatActivity {
             }
 
 
-            listView.setAdapter(new CustomListAdapter(this, feed.getMessages()));
+            listView.setAdapter(new CustomListAdapter(this, currentFeed.getMessages()));
 
             mRessources = defaultSharedPreferences.getStringSet("new_bar_resources",new HashSet<String>());
             Log.d(TAG_LOG, "mRessources  " + mRessources.toString());
@@ -189,7 +182,7 @@ public class NewsFeedsBar extends AppCompatActivity {
                     {
                         stopServiceNews();
                     }else {
-                        startServiceNews();
+                        startServiceNews(false);
                     }
                 }
             });
@@ -201,12 +194,17 @@ public class NewsFeedsBar extends AppCompatActivity {
         }
     }
 
-    public static void startServiceNews()
+    public static void startServiceNews(Boolean reloadFeeds)
     {
         sharedPreferences = mContext.getSharedPreferences("user_prefs", MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
         Intent svc = new Intent(mContext, MyService.class);
-        svc.putExtra("feed_key", feed);
+        if(reloadFeeds) {
+            svc.setAction("reload");
+        }else
+        {
+            svc.setAction("no");
+        }
         mContext.startService(svc);
         prefsEditor.putBoolean("service_status", true);
         prefsEditor.commit();
@@ -235,7 +233,11 @@ public class NewsFeedsBar extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        SplashScreen.splashActivity.finish();
+        if(SplashScreen.view != null) {
+            SplashScreen.windowManager.removeView(SplashScreen.view);
+            SplashScreen.view = null;
+        }
         setContentView(R.layout.activity_news_feeds_bar);
     }
 

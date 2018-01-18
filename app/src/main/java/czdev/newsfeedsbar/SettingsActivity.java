@@ -60,7 +60,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 if(Boolean.parseBoolean(stringValue)) {
                     Log.d(TAG_LOG, " isChecked    " + preference.getKey() + "Value " + stringValue);
                     if (NewsFeedsBar.getServiceNewsStatus() == false) {
-                        NewsFeedsBar.startServiceNews();
+                        NewsFeedsBar.startServiceNews(false);
                     }
                 }else
                 {
@@ -78,12 +78,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
 
             if(preference.getKey().equals("news_bar_display_position") ||
-                    preference.getKey().equals("new_bar_lang") ||
                     preference.getKey().equals("news_bar_display_speed")) {
                 Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
                 if (NewsFeedsBar.getServiceNewsStatus()) {
                     NewsFeedsBar.stopServiceNews();
-                    NewsFeedsBar.startServiceNews();
+                    NewsFeedsBar.startServiceNews(false);
+                }
+            }
+            if(preference.getKey().equals("new_bar_lang")) {
+                Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
+                if (NewsFeedsBar.getServiceNewsStatus()) {
+                    NewsFeedsBar.stopServiceNews();
+                    NewsFeedsBar.startServiceNews(true);
                 }
             }
 
