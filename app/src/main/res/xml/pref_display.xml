@@ -17,7 +17,7 @@
         android:title="@string/pref_title_news_bar_display_position" />
 
     <ListPreference
-        android:defaultValue="-1"
+        android:defaultValue="0"
         android:entries="@array/pref_news_bar_display_speed_list_titles"
         android:entryValues="@array/pref_news_bar_display_speed_list_values"
         android:key="news_bar_display_speed"

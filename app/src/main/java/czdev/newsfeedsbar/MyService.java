@@ -80,7 +80,6 @@ public class MyService extends Service implements OnClickListener {
     private int step = 0;
     private int screenBarPosition = 0;
     public int mLanguageId = 0;
-    public int mSpeedBar = 0;
     public int currentSpeed = 0;
     String rssResult = "";
     int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 10001;
@@ -169,7 +168,7 @@ public class MyService extends Service implements OnClickListener {
             p.gravity = Gravity.BOTTOM;
         }
 
-        mSpeedBar  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_speed","0"));
+        currentSpeed  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_speed","0"));
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         layoutInflater =
@@ -298,24 +297,6 @@ public class MyService extends Service implements OnClickListener {
             step = -10;
         }
 
-        switch (mSpeedBar)
-        {
-            case 0:
-                currentSpeed = 200;
-                break;
-            case 1:
-                currentSpeed = 100;
-                break;
-            case 2:
-                currentSpeed = 50;
-                break;
-            case 3:
-                currentSpeed = 20;
-                break;
-            case 4:
-                currentSpeed = 10;
-                break;
-        }
         //ar
         //final int diff =  horizontalScrollView.getChildAt(0).getMeasuredWidth() - screenWidth;
         //scrollX =  horizontalScrollView.getScrollX();
