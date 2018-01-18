@@ -4,12 +4,17 @@
 
     <header
         android:fragment="czdev.newsfeedsbar.SettingsActivity$GeneralPreferenceFragment"
-        android:icon="@drawable/ic_menu_black_24dp"
+        android:icon="@android:drawable/ic_menu_manage"
         android:title="@string/pref_header_general" />
 
     <header
+        android:fragment="czdev.newsfeedsbar.SettingsActivity$DisplayPreferenceFragment"
+        android:icon="@android:drawable/ic_menu_crop"
+        android:title="@string/pref_header_display" />
+
+    <header
         android:fragment="czdev.newsfeedsbar.SettingsActivity$AboutPreferenceFragment"
-        android:icon="@drawable/ic_info_black_24dp"
+        android:icon="@android:drawable/ic_menu_info_details"
         android:title="@string/pref_title_about" />
 
 </preference-headers>

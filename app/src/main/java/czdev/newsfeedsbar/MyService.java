@@ -5,14 +5,17 @@ import android.app.ActivityManager;
 import android.app.IntentService;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.text.Html;
@@ -73,10 +76,13 @@ public class MyService extends Service implements OnClickListener {
     Feed mFeed;
     private boolean isPaused = false;
     public int scrollX = 0;
-    private int mScrollDirection = 0;
+    private int mStartingPosition = 0;
+    private int step = 0;
     private int screenBarPosition = 0;
+    public int mLanguageId = 0;
     String rssResult = "";
     int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 10001;
+    SharedPreferences defaultSharedPreferences = null;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -132,6 +138,7 @@ public class MyService extends Service implements OnClickListener {
             String json = mPrefs.getString("SerializableObject", "");
             mFeed = gson.fromJson(json, Feed.class);
         }
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 
         showWindowManager();
@@ -139,7 +146,6 @@ public class MyService extends Service implements OnClickListener {
     }
 
     public void showWindowManager() {
-
 
         p = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -149,19 +155,26 @@ public class MyService extends Service implements OnClickListener {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
 
+
+        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("new_bar_lang","0"));
+        Log.d(TAG_LOG, "mLanguageId  " + mLanguageId);
+        screenBarPosition = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_position","0"));
+        Log.d(TAG_LOG, "screenBarPosition" + screenBarPosition);
+
         if(screenBarPosition == 0) {
             p.gravity = Gravity.TOP;
         }else {
             p.gravity = Gravity.BOTTOM;
         }
 
+
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         layoutInflater =
                 (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         popupView = layoutInflater.inflate(R.layout.wm_shape, null);
-        horizontalScrollView = (HorizontalScrollView) popupView.findViewById(R.id.horizontalScrollView);
+        horizontalScrollView = popupView.findViewById(R.id.horizontalScrollView);
         //arbic = 0
-        if(mScrollDirection == 0)
+        if(mLanguageId == 0)
         {
             horizontalScrollView.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         }else
@@ -169,7 +182,7 @@ public class MyService extends Service implements OnClickListener {
             horizontalScrollView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         }
 
-        linearLayout = (LinearLayout) popupView.findViewById(R.id.linearLayout);
+        linearLayout = popupView.findViewById(R.id.linearLayout);
         for (final FeedMessage message : mFeed.getMessages()) {
             ImageView imageView = new ImageView(this);
             final TextView textView = new TextView(this);
@@ -270,9 +283,19 @@ public class MyService extends Service implements OnClickListener {
     public void startAutoScroll() {
         DisplayMetrics displaymetrics = getApplicationContext().getResources().getDisplayMetrics();
         int screenWidth = displaymetrics.widthPixels;
-        final int diff =  horizontalScrollView.getChildAt(0).getMeasuredWidth() - screenWidth;
-        //scrollX = horizontalScrollView.getScrollX();
-        scrollX =  horizontalScrollView.getScrollX();
+        if(mLanguageId != 0) {
+            //fr en
+            mStartingPosition = 0;
+            step = 10;
+        }else
+        {
+            //ar
+            mStartingPosition =  horizontalScrollView.getChildAt(0).getMeasuredWidth() - screenWidth;
+            step = -10;
+        }
+        //ar
+        //final int diff =  horizontalScrollView.getChildAt(0).getMeasuredWidth() - screenWidth;
+        //scrollX =  horizontalScrollView.getScrollX();
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -280,13 +303,14 @@ public class MyService extends Service implements OnClickListener {
                 listTasks();
                 //scrollX = scrollX + 5;
                 if(isPaused == false) {
-                    scrollX = scrollX - 10;
+
+                     scrollX = scrollX + step;
                     if (scrollX > 0) {
                         horizontalScrollView.scrollTo(scrollX, 0);
                     } else {
                         // to repeat scrolling
-                        scrollX = diff;
-                        horizontalScrollView.scrollTo(diff, 0);
+                        scrollX = mStartingPosition;
+                        horizontalScrollView.scrollTo(mStartingPosition, 0);
                     }
                 }
 

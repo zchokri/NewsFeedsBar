@@ -76,6 +76,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
                 multiSelectListPreference.setSummary(""+stringValue);
             }
+
+            if(preference.getKey().equals("news_bar_display_position")) {
+                Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
+                if (NewsFeedsBar.getServiceNewsStatus()) {
+                    NewsFeedsBar.stopServiceNews();
+                    NewsFeedsBar.startServiceNews();
+                }
+            }
+
             return true;
         }
     };
@@ -176,6 +185,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
+                || DisplayPreferenceFragment.class.getName().equals(fragmentName)
                 || AboutPreferenceFragment.class.getName().equals(fragmentName);
     }
 
@@ -191,17 +201,44 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
 
-            checkBoxPreference = (CheckBoxPreference) findPreference("enable_service");
-            checkBoxPreference.setChecked(NewsFeedsBar.getServiceNewsStatus());
-
             multiSelectListPreference = (MultiSelectListPreference) findPreference("new_bar_resources");
               // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToBooleanValue(findPreference("enable_service"));
             bindPreferenceSummaryToValue(findPreference("new_bar_lang"));
             bindPreferenceSummaryToValue(findPreference("new_bar_refresh_delay"));
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+
+            int id = item.getItemId();
+            Log.d(TAG_LOG, " GeneralPreferenceFragment onOptionsItemSelected    " + id  );
+
+            if (id == android.R.id.home) {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * This fragment shows general preferences only. It is used when the
+     * activity is showing a two-pane settings UI.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class DisplayPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_display);
+            setHasOptionsMenu(true);
+            checkBoxPreference = (CheckBoxPreference) findPreference("enable_service");
+            checkBoxPreference.setChecked(NewsFeedsBar.getServiceNewsStatus());
+            bindPreferenceSummaryToBooleanValue(findPreference("enable_service"));
+            bindPreferenceSummaryToValue(findPreference("news_bar_display_position"));
         }
 
         @Override

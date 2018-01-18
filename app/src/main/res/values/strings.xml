@@ -9,8 +9,8 @@
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
-    <string name="pref_title_news_bar">Enable News Bar</string>
-    <string name="pref_description_news_bar">Switch On to enable news bar display </string>
+    <string name="pref_title_news_bar">News Bar Preview</string>
+    <string name="pref_description_news_bar">Switch On to display news bar preview </string>
 
     <string name="pref_title_alawys_display_news_bar">Always Display News Bar</string>
     <string name="pref_description_always_news_bar">Switch On to display News Bar with Screen Lock </string>
@@ -32,12 +32,42 @@
     <string-array name="empty_array"/>
 
 
-    <string name="pref_title_news_bar_display_position">News Bar Display Position</string>
+    <string name="pref_header_display">Display Settings </string>
+
+    <string name="pref_title_news_bar_display_position">Display Position</string>
     <string-array name="pref_news_bar_display_position_list_titles">
         <item>TOP</item>
         <item>BOTTOM</item>
     </string-array>
     <string-array name="pref_news_bar_display_position_list_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string name="pref_title_news_bar_display_speed">Speed</string>
+    <string-array name="pref_news_bar_display_speed_list_titles">
+        <item>Very Slow</item>
+        <item>Slow</item>
+        <item>Normal</item>
+        <item>Fast</item>
+        <item>Very Fast</item>
+    </string-array>
+    <string-array name="pref_news_bar_display_speed_list_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+
+    <string name="pref_text_style_news_bar" >Select News Text Style </string>
+    <string name="pref_news_text_style"> News Text Style </string>
+    <string-array name="pref_news_text_style_titles">
+        <item>Bold</item>
+        <item>Italic</item>
+    </string-array>
+    <string-array name="pref_news_text_style_values">
         <item>0</item>
         <item>1</item>
     </string-array>

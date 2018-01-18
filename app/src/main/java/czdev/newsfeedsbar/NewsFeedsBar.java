@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
@@ -55,8 +57,10 @@ import com.google.gson.Gson;
 import java.util.HashSet;
 import java.util.Set;
 
+import static android.content.Context.MODE_PRIVATE;
 
-public class NewsFeedsBar extends AppCompatActivity  {
+
+public class NewsFeedsBar extends AppCompatActivity {
 
     public static String TAG_LOG = "NewsBar";
     public static final String FEED_PREFS_NAME = "FEED_PREFS";
@@ -68,8 +72,8 @@ public class NewsFeedsBar extends AppCompatActivity  {
     Animation animSideDown;
     public static Feed feed;
     private boolean isPaused = false;
-    public int mLanguageId = 0;
     public int  mRefreshDelay = 0;
+    public int  mLanguageId= 0;
     public Set<String> mRessources = null;
     public int mPosition = 0;
 
@@ -84,6 +88,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
         mContext = getBaseContext();
 
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         Log.d(TAG_LOG, "News Bar Running! " + isMyServiceRunning(MyService.class));
         feed = SplashScreen.getFeed();
@@ -107,14 +112,11 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
 
             listView.setAdapter(new CustomListAdapter(this, feed.getMessages()));
-            mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("new_bar_lang","0"));
-            Log.d(TAG_LOG, "mLanguageId  " + mLanguageId);
 
             mRessources = defaultSharedPreferences.getStringSet("new_bar_resources",new HashSet<String>());
             Log.d(TAG_LOG, "mRessources  " + mRessources.toString());
 
-            mPosition = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_position","0"));
-            Log.d(TAG_LOG, "mPosition  " + mPosition);
+
 
             mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("new_bar_refresh_delay","0"));
 
@@ -136,6 +138,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
                     break;
             }
+            mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("new_bar_lang","0"));
 
             if(mLanguageId == 0)
             {
@@ -180,6 +183,8 @@ public class NewsFeedsBar extends AppCompatActivity  {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
+
                     if(getServiceNewsStatus())
                     {
                         stopServiceNews();
@@ -195,7 +200,6 @@ public class NewsFeedsBar extends AppCompatActivity  {
                     .setAction("Action", null).show();
         }
     }
-
 
     public static void startServiceNews()
     {
@@ -233,10 +237,9 @@ public class NewsFeedsBar extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_news_feeds_bar);
-        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-
     }
+
+
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);

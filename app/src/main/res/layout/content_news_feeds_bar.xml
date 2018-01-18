@@ -5,11 +5,13 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-<ListView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textDirection="ltr"
-    android:layoutDirection="ltr"
-    android:id="@+id/listView">
-</ListView>
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:divider="#FFFFFF"
+        android:dividerHeight="7dp"
+        android:layout_weight="1"
+        android:listSelector="@drawable/list_selector" />
+
 </android.support.constraint.ConstraintLayout>
