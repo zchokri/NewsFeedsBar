@@ -33,6 +33,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import com.google.gson.Gson;
+
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -60,6 +63,7 @@ public class MyService extends Service implements OnClickListener {
     private int screenBarPosition = 0;
     public int mLanguageId = 0;
     public int currentSpeed = 0;
+    public int textSize = 0;
     String rssResult = "";
     int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 10001;
     SharedPreferences defaultSharedPreferences = null;
@@ -110,7 +114,16 @@ public class MyService extends Service implements OnClickListener {
            retrieveFeedTask.readUrls();
            mFeed = retrieveFeedTask.getFeed();
         }else {
-            mFeed = SplashScreen.retrieveFeedTask.getFeed();
+            if(SplashScreen.retrieveFeedTask != null) {
+                mFeed = SplashScreen.retrieveFeedTask.getFeed();
+            }else
+            {
+                //force reload
+                RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(this,false));
+                retrieveFeedTask.readUrls();
+                mFeed = retrieveFeedTask.getFeed();
+
+            }
         }
         if(mFeed != null) {
             mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
@@ -144,11 +157,11 @@ public class MyService extends Service implements OnClickListener {
                 PixelFormat.TRANSLUCENT);
 
 
-        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("new_bar_lang","0"));
+        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
         Log.d(TAG_LOG, "mLanguageId  " + mLanguageId);
         screenBarPosition = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_position","0"));
         Log.d(TAG_LOG, "screenBarPosition" + screenBarPosition);
-        Set<String> multiSelectListPreference = defaultSharedPreferences.getStringSet("new_bar_text_style", null );
+        Set<String> multiSelectListPreference = defaultSharedPreferences.getStringSet("news_bar_text_style", Collections.<String>emptySet() );
         boolean boldText = multiSelectListPreference.contains("0");
         boolean italicText = multiSelectListPreference.contains("1");
 
@@ -159,6 +172,7 @@ public class MyService extends Service implements OnClickListener {
         }
 
         currentSpeed  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_speed","0"));
+        textSize  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_text_size","10"));
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         layoutInflater =
@@ -178,13 +192,17 @@ public class MyService extends Service implements OnClickListener {
         for (final FeedMessage message : mFeed.getMessages()) {
             ImageView imageView = new ImageView(this);
             final TextView textView = new TextView(this);
-            if (message.getLink().contains("cnn")) {
+            if(message.getLink().contains("cnn")) {
                 imageView.setImageResource(R.drawable.cnn2);
-            }
-            else
+            }else if(message.getLink().contains("24"))
             {
+                imageView.setImageResource(R.drawable.f24);
+
+            } if(message.getLink().contains("jaze")) {
                 imageView.setImageResource(R.drawable.jsc);
+
             }
+
             myRotation = AnimationUtils.loadAnimation(popupView.getContext(), R.anim.rotator);
             myRotation.setRepeatCount(Animation.INFINITE);
             imageView.startAnimation(myRotation);
@@ -196,6 +214,7 @@ public class MyService extends Service implements OnClickListener {
             else if (italicText)
                 textView.setTypeface(textView.getTypeface(), Typeface.ITALIC);
             textView.setTextColor(Color.WHITE);
+            textView.setTextSize(textSize);
             textView.setText(Html.fromHtml("<a href=\"" + message.getLink() + "\">" + message.getTitle() + "</a>"));
             textView.setGravity(Gravity.CENTER_VERTICAL);
             textView.setOnClickListener(new View.OnClickListener() {
