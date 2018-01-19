@@ -9,8 +9,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.NetworkOnMainThreadException;
+import android.preference.MultiSelectListPreference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -19,6 +24,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.ExecutionException;
+
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -61,7 +67,6 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
 
     public void readUrls() {
         mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("new_bar_lang","0"));
-
         switch (mLanguageId)
         {
             case 0:

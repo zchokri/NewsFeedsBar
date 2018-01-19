@@ -1,23 +1,15 @@
 package czdev.newsfeedsbar;
 
-import android.annotation.TargetApi;
-import android.app.ActivityManager;
-import android.app.IntentService;
 import android.app.Service;
-import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
-import android.support.annotation.Nullable;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -25,8 +17,6 @@ import android.text.TextPaint;
 import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -36,26 +26,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.os.IBinder;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
-import android.widget.Button;
-import android.widget.Toast;
-
 import com.google.gson.Gson;
+import java.util.Set;
 
-import java.util.List;
-
-import static android.content.ContentValues.TAG;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class MyService extends Service implements OnClickListener {
@@ -169,6 +148,9 @@ public class MyService extends Service implements OnClickListener {
         Log.d(TAG_LOG, "mLanguageId  " + mLanguageId);
         screenBarPosition = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_position","0"));
         Log.d(TAG_LOG, "screenBarPosition" + screenBarPosition);
+        Set<String> multiSelectListPreference = defaultSharedPreferences.getStringSet("new_bar_text_style", null );
+        boolean boldText = multiSelectListPreference.contains("0");
+        boolean italicText = multiSelectListPreference.contains("1");
 
         if(screenBarPosition == 0) {
             p.gravity = Gravity.TOP;
@@ -207,6 +189,12 @@ public class MyService extends Service implements OnClickListener {
             myRotation.setRepeatCount(Animation.INFINITE);
             imageView.startAnimation(myRotation);
             linearLayout.addView(imageView);
+            if(boldText && italicText)
+                textView.setTypeface(textView.getTypeface(), Typeface.BOLD_ITALIC);
+            else if (boldText)
+                textView.setTypeface(textView.getTypeface(), Typeface.BOLD);
+            else if (italicText)
+                textView.setTypeface(textView.getTypeface(), Typeface.ITALIC);
             textView.setTextColor(Color.WHITE);
             textView.setText(Html.fromHtml("<a href=\"" + message.getLink() + "\">" + message.getTitle() + "</a>"));
             textView.setGravity(Gravity.CENTER_VERTICAL);

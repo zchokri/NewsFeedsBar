@@ -4,9 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -14,17 +11,16 @@ import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.SwitchPreference;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.RingtonePreference;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -46,6 +42,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
      */
+
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
@@ -74,17 +71,22 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             if(preference.getKey().equals("new_bar_resources")) {
                 Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
-                multiSelectListPreference.setSummary(""+stringValue);
+                if (NewsFeedsBar.getServiceNewsStatus()) {
+                    NewsFeedsBar.stopServiceNews();
+                    NewsFeedsBar.startServiceNews(true);
+                }
             }
 
             if(preference.getKey().equals("news_bar_display_position") ||
-                    preference.getKey().equals("news_bar_display_speed")) {
+                    preference.getKey().equals("news_bar_display_speed") ||
+                    preference.getKey().equals("new_bar_text_style") ) {
                 Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
                 if (NewsFeedsBar.getServiceNewsStatus()) {
                     NewsFeedsBar.stopServiceNews();
                     NewsFeedsBar.startServiceNews(false);
                 }
             }
+
             if(preference.getKey().equals("new_bar_lang")) {
                 Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
                 if (NewsFeedsBar.getServiceNewsStatus()) {
@@ -139,6 +141,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         .getBoolean(preference.getKey(), false));
     }
 
+    private static void bindPreferenceSummaryToSetString (MultiSelectListPreference preference) {
+        // Set the listener to watch for values changes.
+      if (preference != null)
+      {
+            Set<String> selectedItems = new HashSet<String>(PreferenceManager.getDefaultSharedPreferences(
+                    preference.getContext()).getStringSet(preference.getKey(), null));
+            preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+
+            // Trigger the listener immediately with the preference's
+            // current value.
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, selectedItems);
+      }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,6 +231,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("new_bar_lang"));
             bindPreferenceSummaryToValue(findPreference("new_bar_refresh_delay"));
+            bindPreferenceSummaryToSetString(multiSelectListPreference);
         }
 
         @Override
@@ -248,8 +264,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToBooleanValue(findPreference("enable_service"));
             bindPreferenceSummaryToValue(findPreference("news_bar_display_position"));
             bindPreferenceSummaryToValue(findPreference("news_bar_display_speed"));
-
-
+            bindPreferenceSummaryToSetString((MultiSelectListPreference) findPreference("new_bar_text_style"));
         }
 
         @Override
