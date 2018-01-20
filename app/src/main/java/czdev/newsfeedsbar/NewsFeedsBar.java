@@ -237,7 +237,9 @@ public class NewsFeedsBar extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SplashScreen.splashActivity.finish();
+        if(SplashScreen.splashActivity != null) {
+            SplashScreen.splashActivity.finish();
+        }
         if(SplashScreen.view != null) {
             SplashScreen.windowManager.removeView(SplashScreen.view);
             SplashScreen.view = null;

@@ -188,7 +188,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             setHasOptionsMenu(true);
 
             listPreference = (MultiSelectListPreference) findPreference("news_bar_resources");
-            listPreference.setSummary(listPreference.getEntryValues()+"");
+
+            listPreference.setSummary(listPreference.getValues().toString());
             bindPreferenceSummaryToValue(findPreference("show_preview"));
             bindPreferenceSummaryToValue(findPreference("news_bar_lang"));
             bindPreferenceSummaryToValue(findPreference("news_bar_resources"));
