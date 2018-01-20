@@ -108,7 +108,7 @@ public class MyService extends Service implements OnClickListener {
         if (intent !=null && intent.getExtras()!=null)
             mFeed = (Feed) intent.getSerializableExtra("feed_key");
 
-        if(intent.getAction().toString().equals("reload"))
+        if(intent  != null && intent.getAction().toString().equals("reload"))
         {
            RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(this,false));
            retrieveFeedTask.readUrls();

@@ -61,7 +61,7 @@ public class CustomListAdapter  extends BaseAdapter {
        // int imageId = this.getMipmapResIdByName();
         if(feedMessage.getLink().contains("cnn")) {
             holder.flagView.setImageResource(R.drawable.cnn2);
-        }else if(feedMessage.getLink().contains("cnn"))
+        }else if(feedMessage.getLink().contains("24"))
             {
             holder.flagView.setImageResource(R.drawable.f24);
 

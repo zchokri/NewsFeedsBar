@@ -73,9 +73,6 @@ import static czdev.newsfeedsbar.NewsFeedsBar.mContext;
 public class SplashScreen extends Activity {
 
     public static RetrieveFeedTask retrieveFeedTask;
-    RelativeLayout.LayoutParams absParams = null;
-    int counter = 0;
-    private VideoView videoView;
     WindowManager.LayoutParams p;
     public static WindowManager windowManager;
     LayoutInflater layoutInflater;
@@ -83,8 +80,6 @@ public class SplashScreen extends Activity {
     public static SharedPreferences mPrefs;
     public final static int REQUEST_CODE = -1010101;
     public static Activity splashActivity;
-
-
     public static View view;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -137,18 +132,6 @@ public class SplashScreen extends Activity {
                     (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
             view = layoutInflater.inflate(R.layout.activity_splash, null);
             windowManager.addView(view, p);
-            videoView = view.findViewById(R.id.videoViewSplash);
-
-            try {
-                // ID of video file.
-                videoView.setVideoURI(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.splash));
-                videoView.start();
-
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-
             /**
              * Showing splashscreen while making network calls to download necessary
              * data before launching the app Will use AsyncTask to make http call
