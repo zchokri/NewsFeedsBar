@@ -106,12 +106,12 @@ public class NewsFeedsBar extends AppCompatActivity {
 
             listView.setAdapter(new CustomListAdapter(this, currentFeed.getMessages()));
 
-            mRessources = defaultSharedPreferences.getStringSet("new_bar_resources",new HashSet<String>());
+            mRessources = defaultSharedPreferences.getStringSet("news_bar_resources",new HashSet<String>());
             Log.d(TAG_LOG, "mRessources  " + mRessources.toString());
 
 
 
-            mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("new_bar_refresh_delay","0"));
+            mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","0"));
 
             switch (mRefreshDelay){
                 case 0:
@@ -131,7 +131,7 @@ public class NewsFeedsBar extends AppCompatActivity {
 
                     break;
             }
-            mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("new_bar_lang","0"));
+            mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
 
             if(mLanguageId == 0)
             {
@@ -172,6 +172,7 @@ public class NewsFeedsBar extends AppCompatActivity {
             mBuilder.setContentIntent(pendingIntent);
             fab = (FloatingActionButton) findViewById(R.id.fab);
             sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+            fab.setImageResource(getServiceNewsStatus()?R.drawable.pause:R.drawable.play);
 
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -181,8 +182,10 @@ public class NewsFeedsBar extends AppCompatActivity {
                     if(getServiceNewsStatus())
                     {
                         stopServiceNews();
+                        defaultSharedPreferences.edit().putBoolean("show_preview",false).commit();
                     }else {
                         startServiceNews(false);
+                        defaultSharedPreferences.edit().putBoolean("show_preview",true).commit();
                     }
                 }
             });
@@ -218,9 +221,10 @@ public class NewsFeedsBar extends AppCompatActivity {
         SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
         Intent svc = new Intent(mContext, MyService.class);
         mContext.stopService(svc);
-        fab.setImageResource(R.drawable.play);
         prefsEditor.putBoolean("service_status", false);
         prefsEditor.commit();
+        fab.setImageResource(R.drawable.play);
+
     }
 
     public static boolean getServiceNewsStatus()

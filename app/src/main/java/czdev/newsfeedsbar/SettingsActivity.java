@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,8 +38,9 @@ import java.util.Set;
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
     public static String TAG_LOG = "NewsBar";
-    public static CheckBoxPreference checkBoxPreference = null;
-    public static MultiSelectListPreference multiSelectListPreference = null;
+
+    public static MultiSelectListPreference listPreference = null;
+    public static Boolean previewEnabled = false;
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -48,61 +51,54 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
 
+            if(preference.getKey().equals("show_preview")) {
+            if(Boolean.parseBoolean(stringValue) == true)
+            {
+                previewEnabled = true;
+            }else
+            {
+                previewEnabled = false;
+            }
+            }
+            Log.d(TAG_LOG, " previewEnabled    " + previewEnabled  );
 
-            if(preference.getKey().equals("enable_service")) {
+            if(preference.getKey().equals("show_preview")||
+                    preference.getKey().equals("news_bar_display_position") ||
+                    preference.getKey().equals("news_bar_display_speed") ||
+                    preference.getKey().equals("news_bar_text_style")
+            ) {
 
-                Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
-                Log.d(TAG_LOG,  " isChecked " + checkBoxPreference.isChecked());
-
-                if(Boolean.parseBoolean(stringValue)) {
-                    Log.d(TAG_LOG, " isChecked    " + preference.getKey() + "Value " + stringValue);
-                    if (NewsFeedsBar.getServiceNewsStatus() == false) {
-                        NewsFeedsBar.startServiceNews(false);
-                    }
+                if (previewEnabled) {
+                    NewsFeedsBar.stopServiceNews();
+                    NewsFeedsBar.startServiceNews(false);
                 }else
                 {
-                    Log.d(TAG_LOG, " isChecked    " + preference.getKey() + "Value " + stringValue);
-                    if (NewsFeedsBar.getServiceNewsStatus()) {
+                    NewsFeedsBar.stopServiceNews();
+                }
+
+            }
+
+            if(preference.getKey().equals("news_bar_lang")||
+                    preference.getKey().equals("news_bar_resources")
+                    ) {
+
+                if (previewEnabled) {
+                        NewsFeedsBar.stopServiceNews();
+                        NewsFeedsBar.startServiceNews(true);
+                    }else
+                    {
                         NewsFeedsBar.stopServiceNews();
                     }
                 }
 
-            }
-
-            if(preference.getKey().equals("new_bar_resources")) {
-                Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
-                if (NewsFeedsBar.getServiceNewsStatus()) {
-                    NewsFeedsBar.stopServiceNews();
-                    NewsFeedsBar.startServiceNews(true);
-                }
-            }
-
-            if(preference.getKey().equals("news_bar_display_position") ||
-                    preference.getKey().equals("news_bar_display_speed") ||
-                    preference.getKey().equals("new_bar_text_style") ) {
-                Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
-                if (NewsFeedsBar.getServiceNewsStatus()) {
-                    NewsFeedsBar.stopServiceNews();
-                    NewsFeedsBar.startServiceNews(false);
-                }
-            }
-
-            if(preference.getKey().equals("new_bar_lang")) {
-                Log.d(TAG_LOG, " Key    " + preference.getKey() + "Value " + stringValue);
-                if (NewsFeedsBar.getServiceNewsStatus()) {
-                    NewsFeedsBar.stopServiceNews();
-                    NewsFeedsBar.startServiceNews(true);
-                }
-            }
 
             return true;
         }
     };
-
-    /**
-     * Helper method to determine if the device has an extra-large screen. For
-     * example, 10" tablets are extra-large.
-     */
+            /**
+             * Helper method to determine if the device has an extra-large screen. For
+             * example, 10" tablets are extra-large.
+             */
     private static boolean isXLargeTablet(Context context) {
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
@@ -120,39 +116,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     private static void bindPreferenceSummaryToValue(Preference preference) {
         // Set the listener to watch for value changes.
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
-        // Trigger the listener immediately with the preference's
-        // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
-    }
-
-    private static void bindPreferenceSummaryToBooleanValue(Preference preference) {
-        // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
-        // Trigger the listener immediately with the preference's
-        // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getBoolean(preference.getKey(), false));
-    }
-
-    private static void bindPreferenceSummaryToSetString (MultiSelectListPreference preference) {
-        // Set the listener to watch for values changes.
-      if (preference != null)
-      {
-            Set<String> selectedItems = new HashSet<String>(PreferenceManager.getDefaultSharedPreferences(
-                    preference.getContext()).getStringSet(preference.getKey(), null));
-            preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
-            // Trigger the listener immediately with the preference's
-            // current value.
-            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, selectedItems);
-      }
     }
 
     @Override
@@ -224,21 +187,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
 
-            multiSelectListPreference = (MultiSelectListPreference) findPreference("new_bar_resources");
-              // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("new_bar_lang"));
-            bindPreferenceSummaryToValue(findPreference("new_bar_refresh_delay"));
-            bindPreferenceSummaryToSetString(multiSelectListPreference);
+            listPreference = (MultiSelectListPreference) findPreference("news_bar_resources");
+            listPreference.setSummary(listPreference.getEntryValues()+"");
+            bindPreferenceSummaryToValue(findPreference("show_preview"));
+            bindPreferenceSummaryToValue(findPreference("news_bar_lang"));
+            bindPreferenceSummaryToValue(findPreference("news_bar_resources"));
+            bindPreferenceSummaryToValue(findPreference("news_bar_refresh_delay"));
+
         }
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
 
             int id = item.getItemId();
-            Log.d(TAG_LOG, " GeneralPreferenceFragment onOptionsItemSelected    " + id  );
 
             if (id == android.R.id.home) {
                 startActivity(new Intent(getActivity(), SettingsActivity.class));
@@ -259,12 +220,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_display);
             setHasOptionsMenu(true);
-            checkBoxPreference = (CheckBoxPreference) findPreference("enable_service");
-            checkBoxPreference.setChecked(NewsFeedsBar.getServiceNewsStatus());
-            bindPreferenceSummaryToBooleanValue(findPreference("enable_service"));
+
+            bindPreferenceSummaryToValue(findPreference("show_preview"));
             bindPreferenceSummaryToValue(findPreference("news_bar_display_position"));
             bindPreferenceSummaryToValue(findPreference("news_bar_display_speed"));
-            bindPreferenceSummaryToSetString((MultiSelectListPreference) findPreference("new_bar_text_style"));
+            bindPreferenceSummaryToValue(findPreference("news_bar_text_style"));
         }
 
         @Override

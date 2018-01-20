@@ -2,12 +2,12 @@
 
     <CheckBoxPreference
         android:defaultValue="false"
-        android:key="enable_service"
+        android:key="show_preview"
         android:summary="@string/pref_description_news_bar"
         android:title="@string/pref_title_news_bar" />
 
     <ListPreference
-        android:defaultValue="-1"
+        android:defaultValue="0"
         android:entries="@array/pref_news_bar_display_position_list_titles"
         android:entryValues="@array/pref_news_bar_display_position_list_values"
         android:key="news_bar_display_position"
@@ -28,7 +28,7 @@
 
     <MultiSelectListPreference
         android:dialogTitle="@string/pref_news_text_style"
-        android:key="new_bar_text_style"
+        android:key="news_bar_text_style"
         android:title="@string/pref_news_text_style"
         android:entries="@array/pref_news_text_style_titles"
         android:entryValues="@array/pref_news_text_style_values"

@@ -66,7 +66,7 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
     }
 
     public void readUrls() {
-        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("new_bar_lang","0"));
+        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
         switch (mLanguageId)
         {
             case 0:
@@ -76,6 +76,7 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
                 mUrls ="http://www.france24.com/fr/afrique/rss";
                 break;
             case 2:
+            default:
                 mUrls ="http://www.france24.com/en/africa/rss";
                 break;
         }
