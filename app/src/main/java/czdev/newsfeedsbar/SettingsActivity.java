@@ -1,9 +1,11 @@
 package czdev.newsfeedsbar;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -14,6 +16,7 @@ import android.preference.PreferenceActivity;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
@@ -22,6 +25,7 @@ import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -41,6 +45,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
     public static MultiSelectListPreference listPreference = null;
     public static Boolean previewEnabled = false;
+    public static Context mContext = null;
+    public static Activity settingsActivity = null;
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -94,6 +101,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                 if(preference.getKey().equals("app_lang")){
                 //TODO Change application language
+                    changeLanguageTo(stringValue);
                 }
 
 
@@ -107,6 +115,22 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     private static boolean isXLargeTablet(Context context) {
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
+    }
+
+    private static void changeLanguageTo(String lang) {
+
+        Log.d(TAG_LOG, "Change Language " + lang );
+
+        Locale myLocale = new Locale(lang);
+        Resources res =   mContext.getResources();
+        DisplayMetrics dm = res.getDisplayMetrics();
+        Configuration conf = res.getConfiguration();
+        conf.locale = myLocale;
+        res.updateConfiguration(conf, dm);
+
+        Intent refresh = new Intent(mContext, SettingsActivity.class);
+        mContext.startActivity(refresh);
+        settingsActivity.finish();
     }
 
     /**
@@ -127,6 +151,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+        mContext = this;
+        settingsActivity = this;
     }
 
     /**
@@ -139,6 +165,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
+
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {

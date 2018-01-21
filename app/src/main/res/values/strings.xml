@@ -115,6 +115,16 @@
         <item>18</item>
         <item>20</item>
     </string-array>
+    <string-array name="pref_app_lang_list_titles">
+        <item>Arabic</item>
+        <item>French</item>
+        <item>English</item>
+    </string-array>
+    <string-array name="pref_app_lang_list_values">
+        <item>ar</item>
+        <item>fr</item>
+        <item>en</item>
+    </string-array>
 
     <!-- Example settings for Data & Sync -->
     <string name="pref_header_data_sync">About </string>

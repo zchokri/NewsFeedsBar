@@ -1,6 +1,7 @@
 package czdev.newsfeedsbar;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -8,6 +9,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -56,9 +59,11 @@ import com.google.gson.Gson;
 import com.sun.org.apache.regexp.internal.RE;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import static android.content.Context.MODE_PRIVATE;
+import static czdev.newsfeedsbar.SettingsActivity.TAG_LOG;
 
 
 public class NewsFeedsBar extends AppCompatActivity {
@@ -76,6 +81,7 @@ public class NewsFeedsBar extends AppCompatActivity {
     public static  Context mContext = null;
     public static SharedPreferences sharedPreferences = null;
     SharedPreferences defaultSharedPreferences = null;
+    public static Activity newsBarActivity =null;
     private final Handler handler = new Handler();
 
     @Override
@@ -85,7 +91,7 @@ public class NewsFeedsBar extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.listView);
 
         mContext = getBaseContext();
-
+        newsBarActivity = this;
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         Log.d(TAG_LOG, "News Bar Running! " + isMyServiceRunning(MyService.class));
@@ -153,7 +159,7 @@ public class NewsFeedsBar extends AppCompatActivity {
             fab = (FloatingActionButton) findViewById(R.id.fab);
             sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
             fab.setImageResource(getServiceNewsStatus()?R.drawable.pause:R.drawable.play);
-
+            //changeLanguageTo("fr");
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -186,7 +192,7 @@ public class NewsFeedsBar extends AppCompatActivity {
                     stopServiceNews();
                     startServiceNews(true);
                 }
-                mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","30"));
+                mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","60"));
                 Log.d(TAG_LOG, "refresh time   " + mRefreshDelay);
                 refreshListNews();
                 doTheAutoRefresh();

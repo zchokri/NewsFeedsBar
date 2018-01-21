@@ -139,8 +139,8 @@ public class MyService extends Service implements OnClickListener {
         }
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        doTheAutoRefresh();
-        //showWindowManager();
+        //doTheAutoRefresh();
+        showWindowManager();
         return super.onStartCommand(intent, flags, startId);
     }
 
