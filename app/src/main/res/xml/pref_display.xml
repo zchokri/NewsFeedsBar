@@ -36,4 +36,14 @@
         android:persistent="true"
         />
 
+    <ListPreference
+        android:defaultValue="10"
+        android:entries="@array/pref_news_bar_display_text_size_list_values"
+        android:entryValues="@array/pref_news_bar_display_text_size_list_values"
+        android:key="news_bar_display_text_size"
+        android:summary="%s"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_news_bar_display_text_size" />
+
 </PreferenceScreen>

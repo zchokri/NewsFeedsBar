@@ -65,7 +65,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             if(preference.getKey().equals("show_preview")||
                     preference.getKey().equals("news_bar_display_position") ||
                     preference.getKey().equals("news_bar_display_speed") ||
-                    preference.getKey().equals("news_bar_text_style")
+                    preference.getKey().equals("news_bar_text_style") ||
+                    preference.getKey().equals("news_bar_display_text_size")
             ) {
 
                 if (previewEnabled) {
@@ -89,6 +90,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     {
                         NewsFeedsBar.stopServiceNews();
                     }
+                }
+
+                if(preference.getKey().equals("app_lang")){
+                //TODO Change application language
                 }
 
 
@@ -191,6 +196,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             listPreference.setSummary(listPreference.getValues().toString());
             bindPreferenceSummaryToValue(findPreference("show_preview"));
+            bindPreferenceSummaryToValue(findPreference("app_lang"));
             bindPreferenceSummaryToValue(findPreference("news_bar_lang"));
             bindPreferenceSummaryToValue(findPreference("news_bar_resources"));
             bindPreferenceSummaryToValue(findPreference("news_bar_refresh_delay"));
@@ -226,6 +232,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("news_bar_display_position"));
             bindPreferenceSummaryToValue(findPreference("news_bar_display_speed"));
             bindPreferenceSummaryToValue(findPreference("news_bar_text_style"));
+            bindPreferenceSummaryToValue(findPreference("news_bar_display_text_size"));
+
         }
 
         @Override

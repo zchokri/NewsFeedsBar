@@ -172,7 +172,7 @@ public class MyService extends Service implements OnClickListener {
         }
 
         currentSpeed  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_speed","0"));
-        textSize  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_text_size","10"));
+        textSize  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_text_size","10"));
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         layoutInflater =

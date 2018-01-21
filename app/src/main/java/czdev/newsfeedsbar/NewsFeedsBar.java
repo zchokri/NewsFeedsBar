@@ -66,16 +66,13 @@ public class NewsFeedsBar extends AppCompatActivity {
     public static String TAG_LOG = "NewsBar";
     NotificationCompat.Builder mBuilder;
     public static FloatingActionButton fab;
-    int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 10001;
-    String rssResult = "";
     Animation animSideDown;
-    private boolean isPaused = false;
     public int  mRefreshDelay = 0;
     public int  mLanguageId= 0;
     public Set<String> mRessources = null;
-    public int mPosition = 0;
-    public Feed currentFeed;
+    public static Feed mFeed;
 
+    public static ListView listView = null;
     public static  Context mContext = null;
     public static SharedPreferences sharedPreferences = null;
     SharedPreferences defaultSharedPreferences = null;
@@ -83,28 +80,20 @@ public class NewsFeedsBar extends AppCompatActivity {
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        final ListView listView = (ListView) findViewById(R.id.listView);
+        listView = (ListView) findViewById(R.id.listView);
 
         mContext = getBaseContext();
 
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         Log.d(TAG_LOG, "News Bar Running! " + isMyServiceRunning(MyService.class));
-        currentFeed = SplashScreen.retrieveFeedTask.getFeed();
+        mFeed = SplashScreen.retrieveFeedTask.getFeed();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if(currentFeed != null) {
-            System.out.println(currentFeed);
-            for (FeedMessage message : currentFeed.getMessages()) {
-                System.out.println(message);
-                rssResult += message.getTitle();
-                rssResult += " ~[~]~ ";
+        if(mFeed != null) {
 
-            }
-
-
-            listView.setAdapter(new CustomListAdapter(this, currentFeed.getMessages()));
+            listView.setAdapter(new CustomListAdapter(this, mFeed.getMessages()));
 
             mRessources = defaultSharedPreferences.getStringSet("news_bar_resources",new HashSet<String>());
             Log.d(TAG_LOG, "mRessources  " + mRessources.toString());
@@ -234,6 +223,27 @@ public class NewsFeedsBar extends AppCompatActivity {
         return service_status;
     }
 
+    public static void refreshListNews() {
+        //force reload
+        RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false));
+        retrieveFeedTask.readUrls();
+        mFeed = retrieveFeedTask.getFeed();
+        if (mFeed == null) {
+            Snackbar.make(listView, "Please Check your Internet connection", Snackbar.LENGTH_LONG)
+                    .setActionTextColor(Color.RED)
+                    .setAction("Action", null).show();
+
+        } else
+        {
+            CustomListAdapter customListAdapter = new CustomListAdapter(mContext, mFeed.getMessages());
+            listView.setAdapter(customListAdapter);
+            customListAdapter.notifyDataSetChanged();
+            Snackbar.make(listView, "News updated ", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+          }
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -277,6 +287,12 @@ public class NewsFeedsBar extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_refresh) {
+            // refresh and change adapter
+            refreshListNews();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -286,6 +302,12 @@ public class NewsFeedsBar extends AppCompatActivity {
        // svc.putExtra("feed_key", feed);
        // startService(svc);
         super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
     }
 
     @Override

@@ -103,6 +103,19 @@
         <item>2</item>
     </string-array>
 
+
+    <string name="pref_title_new_bar_lang" >News Language</string>
+    <string name="pref_title_app_lang">Application Language</string>
+    <string name="pref_title_news_bar_display_text_size">Text Size</string>
+    <string-array name="pref_news_bar_display_text_size_list_values">
+        <item>10</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+    </string-array>
+
     <!-- Example settings for Data & Sync -->
     <string name="pref_header_data_sync">About </string>
 
@@ -111,8 +124,6 @@
     <string name="pref_title_system_sync_settings">Legal Information</string>
 
     <string name="pref_title_refresh_news">Refresh Delay</string>
-    <string name="pref_title_new_bar_lang" >News Language</string>
-
     <string-array name="refresh_list_titles">
         <item>Always</item>
         <item>When possible</item>
