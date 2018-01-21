@@ -76,6 +76,8 @@ public class NewsFeedsBar extends AppCompatActivity {
     public static  Context mContext = null;
     public static SharedPreferences sharedPreferences = null;
     SharedPreferences defaultSharedPreferences = null;
+    private final Handler handler = new Handler();
+
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -87,8 +89,18 @@ public class NewsFeedsBar extends AppCompatActivity {
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         Log.d(TAG_LOG, "News Bar Running! " + isMyServiceRunning(MyService.class));
-        mFeed = SplashScreen.retrieveFeedTask.getFeed();
+        if(SplashScreen.retrieveFeedTask != null) {
+            mFeed = SplashScreen.retrieveFeedTask.getFeed();
+        }else
+        {
+            //force reload
+            RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false));
+            retrieveFeedTask.readUrls();
+            mFeed = retrieveFeedTask.getFeed();
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        // refresh handle
+        doTheAutoRefresh();
         setSupportActionBar(toolbar);
 
         if(mFeed != null) {
@@ -96,30 +108,9 @@ public class NewsFeedsBar extends AppCompatActivity {
             listView.setAdapter(new CustomListAdapter(this, mFeed.getMessages()));
 
             mRessources = defaultSharedPreferences.getStringSet("news_bar_resources",new HashSet<String>());
-            Log.d(TAG_LOG, "mRessources  " + mRessources.toString());
+            Log.d(TAG_LOG, "mResources  " + mRessources.toString());
 
 
-
-            mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","0"));
-
-            switch (mRefreshDelay){
-                case 0:
-                    Log.d(TAG_LOG, "mRefreshDelay" + mRefreshDelay);
-
-                    break;
-                case 1:
-                    Log.d(TAG_LOG, "mRefreshDelay" + mRefreshDelay);
-
-                    break;
-                case 2:
-                    Log.d(TAG_LOG, "mRefreshDelay" + mRefreshDelay);
-
-                    break;
-                default:
-                    Log.d(TAG_LOG, "mRefreshDelay" + mRefreshDelay);
-
-                    break;
-            }
             mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
 
             if(mLanguageId == 0)
@@ -186,6 +177,23 @@ public class NewsFeedsBar extends AppCompatActivity {
         }
     }
 
+    private void doTheAutoRefresh() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(getServiceNewsStatus())
+                {
+                    stopServiceNews();
+                    startServiceNews(true);
+                }
+                mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","30"));
+                Log.d(TAG_LOG, "refresh time   " + mRefreshDelay);
+                refreshListNews();
+                doTheAutoRefresh();
+            }
+        }, mRefreshDelay * 1000);
+    }
+
     public static void startServiceNews(Boolean reloadFeeds)
     {
         sharedPreferences = mContext.getSharedPreferences("user_prefs", MODE_PRIVATE);
@@ -238,8 +246,7 @@ public class NewsFeedsBar extends AppCompatActivity {
             CustomListAdapter customListAdapter = new CustomListAdapter(mContext, mFeed.getMessages());
             listView.setAdapter(customListAdapter);
             customListAdapter.notifyDataSetChanged();
-            Snackbar.make(listView, "News updated ", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+            Snackbar.make(listView, "News updated ", Snackbar.LENGTH_LONG).show();
           }
 
     }
@@ -270,7 +277,7 @@ public class NewsFeedsBar extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_customiser_screen_shot, menu);
+        getMenuInflater().inflate(R.menu.menu_app, menu);
         return true;
     }
 

@@ -64,6 +64,8 @@ public class MyService extends Service implements OnClickListener {
     public int mLanguageId = 0;
     public int currentSpeed = 0;
     public int textSize = 0;
+    public int  mRefreshDelay = 0;
+    private final Handler handler = new Handler();
     String rssResult = "";
     int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 10001;
     SharedPreferences defaultSharedPreferences = null;
@@ -80,9 +82,10 @@ public class MyService extends Service implements OnClickListener {
 
     @Override
     public void onDestroy() {
-
-        linearLayout.removeAllViewsInLayout();
-        linearLayout.removeAllViews();
+        if(linearLayout != null) {
+            linearLayout.removeAllViewsInLayout();
+            linearLayout.removeAllViews();
+        }
         if(popupView != null) {
             windowManager.removeView(popupView);
             popupView = null;
@@ -126,12 +129,7 @@ public class MyService extends Service implements OnClickListener {
             }
         }
         if(mFeed != null) {
-            mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
-            SharedPreferences.Editor prefsEditor = mPrefs.edit();
-            Gson gson = new Gson();
-            String json = gson.toJson(mFeed);
-            prefsEditor.putString("SerializableObject", json);
-            prefsEditor.commit();
+            saveCurrentFeeds();
         }
         else {
             mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
@@ -141,8 +139,8 @@ public class MyService extends Service implements OnClickListener {
         }
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-
-        showWindowManager();
+        doTheAutoRefresh();
+        //showWindowManager();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -215,7 +213,7 @@ public class MyService extends Service implements OnClickListener {
                 textView.setTypeface(textView.getTypeface(), Typeface.ITALIC);
             textView.setTextColor(Color.WHITE);
             textView.setTextSize(textSize);
-            textView.setText(Html.fromHtml("<a href=\"" + message.getLink() + "\">" + message.getTitle() + "</a>"));
+            textView.setText(Html.fromHtml(" - " +message.getTitle() + " - "));
             textView.setGravity(Gravity.CENTER_VERTICAL);
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -294,9 +292,15 @@ public class MyService extends Service implements OnClickListener {
 
     }
 
-    private void listTasks() {
-        // Get the Activity Manager
+    public void saveCurrentFeeds() {
+        mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(mFeed);
+        prefsEditor.putString("SerializableObject", json);
+        prefsEditor.commit();
     }
+
     public void startAutoScroll() {
         DisplayMetrics displaymetrics = getApplicationContext().getResources().getDisplayMetrics();
         int screenWidth = displaymetrics.widthPixels;
@@ -311,15 +315,10 @@ public class MyService extends Service implements OnClickListener {
             mStartingPosition =  horizontalScrollView.getChildAt(0).getMeasuredWidth() - screenWidth;
             step = -10;
         }
-
-        //ar
-        //final int diff =  horizontalScrollView.getChildAt(0).getMeasuredWidth() - screenWidth;
-        //scrollX =  horizontalScrollView.getScrollX();
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                listTasks();
                 //scrollX = scrollX + 5;
                 if(isPaused == false) {
 
@@ -337,6 +336,33 @@ public class MyService extends Service implements OnClickListener {
             }
         }, currentSpeed);
 
+    }
+    private void doTheAutoRefresh() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","30"));
+                Log.d(TAG_LOG, "refresh time   " + mRefreshDelay);
+                RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(getApplicationContext(),false));
+                retrieveFeedTask.readUrls();
+                mFeed = retrieveFeedTask.getFeed();
+                if(linearLayout != null) {
+                    linearLayout.removeAllViewsInLayout();
+                    linearLayout.removeAllViews();
+                }
+                if(popupView != null) {
+                    windowManager.removeView(popupView);
+                    popupView = null;
+                }
+                if(view != null) {
+                    windowManager.removeView(view);
+                    view = null;
+                }
+                showWindowManager();
+                doTheAutoRefresh();
+
+            }
+        }, mRefreshDelay * 1000);
     }
 
     private void stripUnderlines(TextView textView) {
