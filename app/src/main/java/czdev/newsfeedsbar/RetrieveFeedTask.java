@@ -29,6 +29,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Array;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -72,7 +75,6 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
     }
 
     public void readUrls() {
-        Log.d(TAG_LOG, "momo read urls" );
         mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
         Set<String> ressources = defaultSharedPreferences.getStringSet("news_bar_resources", null );
         List<String> urls = UrlsParser.getMyurls(mContext, mLanguageId, ressources);
@@ -89,6 +91,12 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
             result = event.asCharacters().getData();
         }
         return result;
+    }
+
+    private static int getDate()
+    {
+        DateFormat dateFormat = new SimpleDateFormat("dd");
+        return Integer.parseInt(dateFormat.format(new Date()));
     }
 
     protected Feed doInBackground(String... urls) {
@@ -149,16 +157,17 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
                                     break;
                             }
                         } else if (event.isEndElement()) {
-                            if (event.asEndElement().getName().getLocalPart().equals(ITEM)) {
-                                FeedMessage message = new FeedMessage();
-                                message.setAuthor(author);
-                                message.setDescription(description);
-                                message.setData(pubdate);
-                                message.setLink(link);
-                                message.setTitle(title);
-                                feed.getMessages().add(message);
-                                event = eventReader.nextEvent();
-                                continue;
+                            if (event.asEndElement().getName().getLocalPart().equals(ITEM) &&
+                                    getDate() - Integer.parseInt(pubdate.split(" ")[1]) < 3) {
+                                    FeedMessage message = new FeedMessage();
+                                    message.setAuthor(author);
+                                    message.setDescription(description);
+                                    message.setData(pubdate);
+                                    message.setLink(link);
+                                    message.setTitle(title);
+                                    feed.getMessages().add(message);
+                                    event = eventReader.nextEvent();
+                                    continue;
                             }
                         }
                     }
