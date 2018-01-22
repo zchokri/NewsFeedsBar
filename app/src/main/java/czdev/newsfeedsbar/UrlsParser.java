@@ -75,7 +75,9 @@ public class UrlsParser {
     {
         List<String> urls = new ArrayList<String>();
         String language = getLanguage(itemLang);
-        List<String> ressourcesNames = getRessourcesNames(ressources);
+        List<String> ressourcesNames = new ArrayList<String>();
+        if (ressources != null)
+            ressourcesNames = getRessourcesNames(ressources);
 
         try
         {
@@ -98,7 +100,7 @@ public class UrlsParser {
                                 Log.d(TAG_LOG, "momo link " +  urls);
                             }
                         }
-                        if (ressources.size() == 0)
+                        if (ressourcesNames.size() == 0)
                         {
                             urls.add( getLink(event, eventReader));
                             Log.d(TAG_LOG, "ressources not selected, select all language links: " +  urls);
