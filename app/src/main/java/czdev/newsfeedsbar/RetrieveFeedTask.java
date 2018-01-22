@@ -76,6 +76,7 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
 
     public void readUrls() {
         mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
+        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
         Set<String> ressources = defaultSharedPreferences.getStringSet("news_bar_resources", null );
         List<String> urls = UrlsParser.getMyurls(mContext, mLanguageId, ressources);
 
@@ -99,9 +100,16 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
         return Integer.parseInt(dateFormat.format(new Date()));
     }
 
-    protected Feed doInBackground(String... urls) {
+    private int getNewsDaySelected()
+    {
+        String day = defaultSharedPreferences.getString("news_day","0");
+        Log.d(TAG_LOG, "News day = "+  day);
+        return Integer.parseInt(day);
+    }
 
+    protected Feed doInBackground(String... urls) {
         try {
+            int news_day = getNewsDaySelected();
             Feed feed = null;
             boolean isFeedHeader = true;
             for (int i = 0; i < urls.length; i++) {
@@ -158,7 +166,7 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
                             }
                         } else if (event.isEndElement()) {
                             if (event.asEndElement().getName().getLocalPart().equals(ITEM) &&
-                                    getDate() - Integer.parseInt(pubdate.split(" ")[1]) < 3) {
+                                    getDate() - Integer.parseInt(pubdate.split(" ")[1]) <= news_day) {
                                     FeedMessage message = new FeedMessage();
                                     message.setAuthor(author);
                                     message.setDescription(description);

@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.NetworkOnMainThreadException;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
@@ -145,7 +146,6 @@ public class SplashScreen extends Activity {
         @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
             splashActivity = this;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 Log.v("App","Build Version Greater than or equal to M: "+Build.VERSION_CODES.M);

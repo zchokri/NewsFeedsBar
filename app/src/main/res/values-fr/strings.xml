@@ -28,10 +28,12 @@
     </string-array>
 
     <string-array name="empty_array">
-    <item>0</item>
-    <item>1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
-
+    <string-array name="text_style_empty_array"></string-array>
 
     <string name="pref_header_display">Paramètres d\'affichage </string>
 
@@ -74,19 +76,31 @@
     </string-array>
 
     <string name="pref_title_refresh_news_delay">Actualiser les nouvelles</string>
+    <string name="refresh_default_value">60</string>
     <string-array name="pref_refresh_news_delay_list_titles">
-        <item>30 sec</item>
         <item>1 min</item>
         <item>5 min</item>
         <item>15 min</item>
+        <item>30 min</item>
     </string-array>
     <string-array name="pref_refresh_news_delay_list_values">
-        <item>30</item>
         <item>60</item>
         <item>300</item>
         <item>900</item>
+        <item>1800</item>
     </string-array>
 
+    <string name="pref_news_day">date des nouvelles</string>
+    <string-array name="pref_news_day_list_titles">
+        <item>Aujourd\'hui</item>
+        <item>il y a 1 jour</item>
+        <item>Cette semaine</item>
+    </string-array>
+    <string-array name="pref_news_day_list_values">
+        <item>0</item>
+        <item>1</item>
+        <item>7</item>
+    </string-array>
 
     <string-array name="pref_new_bar_lang_list_titles">
         <item>Arabe</item>

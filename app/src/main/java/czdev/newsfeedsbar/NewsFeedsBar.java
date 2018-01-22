@@ -186,8 +186,7 @@ public class NewsFeedsBar extends AppCompatActivity {
             public void run() {
                 if(getServiceNewsStatus())
                 {
-                    stopServiceNews();
-                    startServiceNews(true);
+                    restartServiceNews(true);
                 }
                 mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","60"));
                 Log.d(TAG_LOG, "refresh time   " + mRefreshDelay);
@@ -225,6 +224,9 @@ public class NewsFeedsBar extends AppCompatActivity {
     {
         sharedPreferences = mContext.getSharedPreferences("user_prefs", MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = sharedPreferences.edit();
+        //check if the service is already stopped
+        if(!sharedPreferences.getBoolean("service_status", false))
+            return;
         Intent svc = new Intent(mContext, MyService.class);
         mContext.stopService(svc);
         prefsEditor.putBoolean("service_status", false);
@@ -236,8 +238,7 @@ public class NewsFeedsBar extends AppCompatActivity {
     public static boolean getServiceNewsStatus()
     {
         sharedPreferences = mContext.getSharedPreferences("user_prefs", MODE_PRIVATE);
-        boolean service_status = sharedPreferences.getBoolean("service_status", false);
-        return service_status;
+        return sharedPreferences.getBoolean("service_status", false);
     }
 
     public static void refreshListNews() {

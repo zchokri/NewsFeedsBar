@@ -169,7 +169,7 @@ public class MyService extends Service implements OnClickListener {
             p.gravity = Gravity.BOTTOM;
         }
 
-        currentSpeed  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_speed","0"));
+        currentSpeed  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_speed","200"));
         textSize  = Integer.parseInt(defaultSharedPreferences.getString("news_bar_display_text_size","10"));
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -341,7 +341,7 @@ public class MyService extends Service implements OnClickListener {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","30"));
+                mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","60"));
                 Log.d(TAG_LOG, "refresh time   " + mRefreshDelay);
                 RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(getApplicationContext(),false));
                 retrieveFeedTask.readUrls();

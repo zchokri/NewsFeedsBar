@@ -86,7 +86,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
 
             else if(preference.getKey().equals("news_bar_lang")||
-                    preference.getKey().equals("news_bar_resources")
+                    preference.getKey().equals("news_bar_resources") ||
+                    preference.getKey().equals("news_day")
                     ) {
 
                 if (previewEnabled) {
@@ -224,6 +225,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("news_bar_resources"));
             bindPreferenceSummaryToValue(findPreference("news_bar_refresh_delay"));
             bindPreferenceSummaryToValue(listPreference);
+            bindPreferenceSummaryToValue(findPreference("news_day"));
 
         }
 

@@ -24,10 +24,12 @@
     </string-array>
 
     <string-array name="empty_array">
-    <item>0</item>
-    <item>1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
-
+    <string-array name="text_style_empty_array"></string-array>
 
     <string name="pref_header_display">اعدادات العرض </string>
 
@@ -70,19 +72,31 @@
     </string-array>
 
     <string name="pref_title_refresh_news_delay">تأخير وقت تحديث الأخبار</string>
+    <string name="refresh_default_value">60</string>
     <string-array name="pref_refresh_news_delay_list_titles">
-        <item>30 ثانية</item>
         <item>1 دقيقة</item>
         <item>5 دقائق</item>
-        <item>15 دقائق</item>
+        <item>15 دقيقة</item>
+        <item>30 دقيقة</item>
     </string-array>
     <string-array name="pref_refresh_news_delay_list_values">
-        <item>30</item>
         <item>60</item>
         <item>300</item>
         <item>900</item>
+        <item>1800</item>
     </string-array>
 
+    <string name="pref_news_day">تاريخ الأخبار</string>
+    <string-array name="pref_news_day_list_titles">
+        <item>اليوم</item>
+        <item>منذ يوم</item>
+        <item>أخبار هذا الأسبوع</item>
+    </string-array>
+    <string-array name="pref_news_day_list_values">
+        <item>0</item>
+        <item>1</item>
+        <item>7</item>
+    </string-array>
 
     <string-array name="pref_new_bar_lang_list_titles">
         <item>عربى</item>
