@@ -97,13 +97,11 @@ public class UrlsParser {
                             if (localPart.toLowerCase().contains(resource.toLowerCase()))
                             {
                                 urls.add( getLink(event, eventReader));
-                                Log.d(TAG_LOG, "momo link " +  urls);
                             }
                         }
                         if (ressourcesNames.size() == 0)
                         {
                             urls.add( getLink(event, eventReader));
-                            Log.d(TAG_LOG, "ressources not selected, select all language links: " +  urls);
                         }
 
                         event = eventReader.nextEvent();
@@ -119,7 +117,7 @@ public class UrlsParser {
         }
         catch (XMLStreamException ex)
         {
-            Log.d(TAG_LOG, "momo.... catch2");
+            Log.d(TAG_LOG, "catch..getMyurls function");
         }
         return null;
 }

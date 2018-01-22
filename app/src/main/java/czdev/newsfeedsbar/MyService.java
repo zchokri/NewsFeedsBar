@@ -244,7 +244,7 @@ public class MyService extends Service implements OnClickListener {
             });
             stripUnderlines(textView);
             linearLayout.addView(textView);
-            System.out.println(message);
+            //System.out.println(message);
             rssResult += message.getTitle();
             rssResult += " ~[~]~ ";
 
@@ -320,7 +320,7 @@ public class MyService extends Service implements OnClickListener {
             @Override
             public void run() {
                 //scrollX = scrollX + 5;
-                if(isPaused == false) {
+                if(!isPaused) {
 
                      scrollX = scrollX + step;
                     if (scrollX > 0) {

@@ -59,26 +59,25 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             String stringValue = value.toString();
 
             if(preference.getKey().equals("show_preview")) {
-            if(Boolean.parseBoolean(stringValue) == true)
-            {
-                previewEnabled = true;
-            }else
-            {
-                previewEnabled = false;
+                if(Boolean.parseBoolean(stringValue))
+                {
+                    previewEnabled = true;
+                    NewsFeedsBar.restartServiceNews(false);
+                }else
+                {
+                    NewsFeedsBar.stopServiceNews();
+                    previewEnabled = false;
+                }
             }
-            }
-            Log.d(TAG_LOG, " previewEnabled    " + previewEnabled  );
 
-            if(preference.getKey().equals("show_preview")||
-                    preference.getKey().equals("news_bar_display_position") ||
+            else if(preference.getKey().equals("news_bar_display_position") ||
                     preference.getKey().equals("news_bar_display_speed") ||
                     preference.getKey().equals("news_bar_text_style") ||
                     preference.getKey().equals("news_bar_display_text_size")
             ) {
 
                 if (previewEnabled) {
-                    NewsFeedsBar.stopServiceNews();
-                    NewsFeedsBar.startServiceNews(false);
+                    NewsFeedsBar.restartServiceNews(false);
                 }else
                 {
                     NewsFeedsBar.stopServiceNews();
@@ -86,23 +85,22 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             }
 
-            if(preference.getKey().equals("news_bar_lang")||
+            else if(preference.getKey().equals("news_bar_lang")||
                     preference.getKey().equals("news_bar_resources")
                     ) {
 
                 if (previewEnabled) {
-                        NewsFeedsBar.stopServiceNews();
-                        NewsFeedsBar.startServiceNews(true);
+                        NewsFeedsBar.restartServiceNews(true);
                     }else
                     {
                         NewsFeedsBar.stopServiceNews();
                     }
                 }
 
-                if(preference.getKey().equals("app_lang")){
-                //TODO Change application language
-                    changeLanguageTo(stringValue);
-                }
+            else if(preference.getKey().equals("app_lang")){
+            //TODO Change application language
+                changeLanguageTo(stringValue);
+            }
 
 
             return true;
@@ -220,13 +218,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             setHasOptionsMenu(true);
 
             listPreference = (MultiSelectListPreference) findPreference("news_bar_resources");
-
-            listPreference.setSummary(listPreference.getValues().toString());
             bindPreferenceSummaryToValue(findPreference("show_preview"));
             bindPreferenceSummaryToValue(findPreference("app_lang"));
             bindPreferenceSummaryToValue(findPreference("news_bar_lang"));
             bindPreferenceSummaryToValue(findPreference("news_bar_resources"));
             bindPreferenceSummaryToValue(findPreference("news_bar_refresh_delay"));
+            bindPreferenceSummaryToValue(listPreference);
 
         }
 

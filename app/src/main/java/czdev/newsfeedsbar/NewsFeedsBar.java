@@ -114,9 +114,6 @@ public class NewsFeedsBar extends AppCompatActivity {
             listView.setAdapter(new CustomListAdapter(this, mFeed.getMessages()));
 
             mRessources = defaultSharedPreferences.getStringSet("news_bar_resources",new HashSet<String>());
-            Log.d(TAG_LOG, "mResources  " + mRessources.toString());
-
-
             mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
 
             if(mLanguageId == 0)
@@ -198,6 +195,12 @@ public class NewsFeedsBar extends AppCompatActivity {
                 doTheAutoRefresh();
             }
         }, mRefreshDelay * 1000);
+    }
+
+    public static void restartServiceNews(Boolean reloadFeeds)
+    {
+        stopServiceNews();
+        startServiceNews(reloadFeeds);
     }
 
     public static void startServiceNews(Boolean reloadFeeds)

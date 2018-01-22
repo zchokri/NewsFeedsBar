@@ -15,7 +15,7 @@ public class FeedMessage implements Serializable {
     String description;
     String link;
     String author;
-    String guid;
+    String date;
 
     public FeedMessage()  {
     }
@@ -59,18 +59,18 @@ public class FeedMessage implements Serializable {
         this.author = author;
     }
 
-    public String getGuid() {
-        return guid;
+    public String getData() {
+        return date;
     }
 
-    public void setGuid(String guid) {
-        this.guid = guid;
+    public void setData(String date) {
+        this.date = date;
     }
 
     @Override
     public String toString() {
         return "FeedMessage [title=" + title + ", description=" + description
-                + ", link=" + link + ", author=" + author + ", guid=" + guid
+                + ", link=" + link + ", author=" + author + ", date=" + date
                 + "]";
     }
 
