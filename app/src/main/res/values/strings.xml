@@ -3,17 +3,9 @@
     <string name="action_settings">Settings</string>
     <string name="head_arrowImage">head_arrowImage</string>
     <string name="title_activity_settings">Settings</string>
-
-    <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
     <string name="pref_header_general">General</string>
-
     <string name="pref_title_news_bar">News Bar Preview</string>
     <string name="pref_description_news_bar">Switch On to display news bar preview </string>
-
-    <string name="pref_title_alawys_display_news_bar">Always Display News Bar</string>
-    <string name="pref_description_always_news_bar">Switch On to display News Bar with Screen Lock </string>
     <string name="pref_resource_news_bar" >Select RSS News resources </string>
     <string name="pref_title_news_resources"> News Resources </string>
     <string-array name="pref_news_resources_titles">
@@ -21,7 +13,6 @@
         <item>Al Jazeera</item>
         <item>BBC News</item>
         <item>France 24</item>
-        <item>New ...</item>
     </string-array>
     <string-array name="pref_news_resources_values">
         <item>0</item>
@@ -35,7 +26,6 @@
     <item>0</item>
     <item>1</item>
     </string-array>
-
 
     <string name="pref_header_display">Display Settings </string>
 

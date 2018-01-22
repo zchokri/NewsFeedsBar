@@ -3,17 +3,10 @@
     <string name="action_settings">إعدادات</string>
     <string name="title_activity_settings">إعدادات</string>
 
-
-    <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
     <string name="pref_header_general">التعديل العام</string>
 
     <string name="pref_title_news_bar">عرض شريط الأخبار</string>
     <string name="pref_description_news_bar">قم بتشغيل لعرض معاينة شريط الأخبار </string>
-
-    <string name="pref_title_alawys_display_news_bar">عرض شريط الأخبار دائما</string>
-    <string name="pref_description_always_news_bar">قم بتشغيل لعرض شريط الأخبار مع قفل الشاشة</string>
     <string name="pref_resource_news_bar" >حدد مصادر RSS الأخبار</string>
     <string name="pref_title_news_resources"> مصادر الأخبار </string>
     <string-array name="pref_news_resources_titles">
@@ -36,9 +29,9 @@
     </string-array>
 
 
-    <string name="pref_header_display">Display Settings </string>
+    <string name="pref_header_display">اعدادات العرض </string>
 
-    <string name="pref_title_news_bar_display_position">اعدادات العرض</string>
+    <string name="pref_title_news_bar_display_position">وضع العرض</string>
     <string-array name="pref_news_bar_display_position_list_titles">
         <item>أعلى</item>
         <item>الأسفل</item>

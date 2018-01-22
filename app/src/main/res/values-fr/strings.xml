@@ -1,26 +1,23 @@
 <resources>
-    <string name="app_name">NewsBar fr </string>
-    <string name="action_settings">Réglages</string>
+    <string name="app_name">Barre d\'actualit\és</string>
+    <string name="action_settings">Paramètres</string>
     <string name="title_activity_settings">Réglages</string>
 
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->
-    <string name="pref_header_general">Génerale</string>
+    <string name="pref_header_general">Générale</string>
 
-    <string name="pref_title_news_bar">News Bar Preview</string>
-    <string name="pref_description_news_bar">Switch On to display news bar preview </string>
+    <string name="pref_title_news_bar">News Bar Aperçu</string>
+    <string name="pref_description_news_bar">Activer pour afficher l\'aperçu de la barre des actualit\és </string>
 
-    <string name="pref_title_alawys_display_news_bar">Always Display News Bar</string>
-    <string name="pref_description_always_news_bar">Switch On to display News Bar with Screen Lock </string>
-    <string name="pref_resource_news_bar" >Select RSS News resources </string>
-    <string name="pref_title_news_resources"> News Resources </string>
+    <string name="pref_resource_news_bar" >Sélectionnez les ressources RSS News</string>
+    <string name="pref_title_news_resources"> Ressources d\'actualit\és</string>
     <string-array name="pref_news_resources_titles">
         <item>CNN News</item>
         <item>Al Jazeera</item>
         <item>BBC News</item>
         <item>France 24</item>
-        <item>New ...</item>
     </string-array>
     <string-array name="pref_news_resources_values">
         <item>0</item>
@@ -36,25 +33,25 @@
     </string-array>
 
 
-    <string name="pref_header_display">Display Settings </string>
+    <string name="pref_header_display">Paramètres d\'affichage </string>
 
-    <string name="pref_title_news_bar_display_position">Display Position</string>
+    <string name="pref_title_news_bar_display_position">Position d\'affichage</string>
     <string-array name="pref_news_bar_display_position_list_titles">
-        <item>TOP</item>
-        <item>BOTTOM</item>
+        <item>HAUT</item>
+        <item>BAS</item>
     </string-array>
     <string-array name="pref_news_bar_display_position_list_values">
         <item>0</item>
         <item>1</item>
     </string-array>
 
-    <string name="pref_title_news_bar_display_speed">Speed</string>
+    <string name="pref_title_news_bar_display_speed">La vitesse</string>
     <string-array name="pref_news_bar_display_speed_list_titles">
-        <item>Very Slow</item>
-        <item>Slow</item>
+        <item>Tr\ès lent</item>
+        <item>Lent</item>
         <item>Normal</item>
-        <item>Fast</item>
-        <item>Very Fast</item>
+        <item>Rapide</item>
+        <item>Tr\ès Rapide</item>
     </string-array>
     <string-array name="pref_news_bar_display_speed_list_values">
         <item>200</item>
@@ -65,18 +62,18 @@
     </string-array>
 
 
-    <string name="pref_text_style_news_bar" >Select News Text Style </string>
-    <string name="pref_news_text_style"> News Text Style </string>
+    <string name="pref_text_style_news_bar" >Sélectionnez le style de texte des actualités</string>
+    <string name="pref_news_text_style"> Style de texte</string>
     <string-array name="pref_news_text_style_titles">
-        <item>Bold</item>
-        <item>Italic</item>
+        <item>Gras</item>
+        <item>Italique</item>
     </string-array>
     <string-array name="pref_news_text_style_values">
         <item>0</item>
         <item>1</item>
     </string-array>
 
-    <string name="pref_title_refresh_news_delay">Refresh News Delay</string>
+    <string name="pref_title_refresh_news_delay">Actualiser les nouvelles</string>
     <string-array name="pref_refresh_news_delay_list_titles">
         <item>30 sec</item>
         <item>1 min</item>
@@ -92,9 +89,9 @@
 
 
     <string-array name="pref_new_bar_lang_list_titles">
-        <item>Arabic</item>
-        <item>Frensh</item>
-        <item>English</item>
+        <item>Arabe</item>
+        <item>Français</item>
+        <item>Anglais</item>
     </string-array>
     <string-array name="pref_new_bar_lang_list_values">
         <item>0</item>
@@ -103,9 +100,9 @@
     </string-array>
 
 
-    <string name="pref_title_new_bar_lang" >News Language</string>
-    <string name="pref_title_app_lang">Application Language</string>
-    <string name="pref_title_news_bar_display_text_size">Text Size</string>
+    <string name="pref_title_new_bar_lang" >Langue des News</string>
+    <string name="pref_title_app_lang">Langue de l\'application</string>
+    <string name="pref_title_news_bar_display_text_size">Taille du texte</string>
     <string-array name="pref_news_bar_display_text_size_list_values">
         <item>10</item>
         <item>12</item>
@@ -115,7 +112,7 @@
         <item>20</item>
     </string-array>
     <string-array name="pref_app_lang_list_titles">
-        <item>Arabic</item>
+        <item>Arabe</item>
         <item>Français</item>
         <item>Anglais</item>
     </string-array>
@@ -125,12 +122,12 @@
         <item>en</item>
     </string-array>
     <!-- Example settings for Data & Sync -->
-    <string name="pref_header_data_sync">About </string>
+    <string name="pref_header_data_sync">A propos</string>
 
-    <string name="pref_title_about"> About News Bar </string>
+    <string name="pref_title_about"> à propos de News Bar </string>
 
-    <string name="pref_title_system_sync_settings">Legal Information</string>
+    <string name="pref_title_system_sync_settings">Information légale</string>
 
-    <string name="pref_title_refresh_news">Refresh Delay</string>
+    <string name="pref_title_refresh_news">Délai d\'actualisation</string>
 
 </resources>
