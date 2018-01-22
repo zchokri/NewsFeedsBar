@@ -1,6 +1,8 @@
 package czdev.newsfeedsbar;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.sun.org.apache.xalan.internal.xsltc.compiler.Parser;
@@ -26,14 +28,24 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
-import static czdev.newsfeedsbar.SettingsActivity.TAG_LOG;
+import static czdev.newsfeedsbar.Constants.*;
 
 /**
  * Created by mlahmadi on 19/01/2018.
  */
 
-public class UrlsParser {
+public class UrlsParser extends AsyncTask< String, String, List<String>> {
 
+
+    private Context mContext;
+    private int itemLang;
+    private Set<String> resources;
+
+    public UrlsParser(Context ctx, int itemLang, Set<String> resources)  {
+        this.mContext = ctx;
+        this.itemLang = itemLang;
+        this.resources = resources;
+    }
     private static String getLink(XMLEvent event, XMLEventReader eventReader)
             throws XMLStreamException {
         String result = "";
@@ -44,19 +56,19 @@ public class UrlsParser {
         return result;
     }
 
-    private static List<String> getRessourcesNames(Set<String> ressources)
+    private static List<String> getResourcesNames(Set<String> resources)
     {
-        List<String> ressourcesNames = new ArrayList<String>();
-        if (ressources.contains("0"))
-            ressourcesNames.add("CNN");
-        if (ressources.contains("1"))
-            ressourcesNames.add("AlJazzeera");
-        if (ressources.contains("2"))
-            ressourcesNames.add("BBC");
-        if (ressources.contains("3"))
-            ressourcesNames.add("France24");
+        List<String> resourcesNames = new ArrayList<String>();
+        if (resources.contains("0"))
+            resourcesNames.add("CNN");
+        if (resources.contains("1"))
+            resourcesNames.add("AlJazzeera");
+        if (resources.contains("2"))
+            resourcesNames.add("BBC");
+        if (resources.contains("3"))
+            resourcesNames.add("France24");
 
-        return ressourcesNames;
+        return resourcesNames;
     }
 
     private static String getLanguage(int itemLang)
@@ -71,18 +83,19 @@ public class UrlsParser {
     }
 
 
-    public static List<String> getMyurls(Context context, int itemLang, Set<String> ressources)
-    {
+    @Override
+    protected List<String> doInBackground(String... strings) {
+
         List<String> urls = new ArrayList<String>();
         String language = getLanguage(itemLang);
-        List<String> ressourcesNames = new ArrayList<String>();
-        if (ressources != null)
-            ressourcesNames = getRessourcesNames(ressources);
+        List<String> resourcesNames = new ArrayList<String>();
+        if (resources != null)
+            resourcesNames = getResourcesNames(resources);
 
         try
         {
             XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-            XMLStreamReader streamReader = inputFactory.createXMLStreamReader(context.getResources().openRawResource(R.raw.links));
+            XMLStreamReader streamReader = inputFactory.createXMLStreamReader(mContext.getResources().openRawResource(R.raw.links));
 
             // Setup a new eventReader
             XMLEventReader eventReader = inputFactory.createXMLEventReader(streamReader);
@@ -93,13 +106,13 @@ public class UrlsParser {
                 if (event.isStartElement()) {
                     String localPart = event.asStartElement().getName().getLocalPart();
                     if (localPart.toLowerCase().contains(language.toLowerCase())) {
-                        for(String resource:ressourcesNames) {
+                        for(String resource:resourcesNames) {
                             if (localPart.toLowerCase().contains(resource.toLowerCase()))
                             {
                                 urls.add( getLink(event, eventReader));
                             }
                         }
-                        if (ressourcesNames.size() == 0)
+                        if (resourcesNames.size() == 0)
                         {
                             urls.add( getLink(event, eventReader));
                         }
@@ -120,5 +133,5 @@ public class UrlsParser {
             Log.d(TAG_LOG, "catch..getMyurls function");
         }
         return null;
-}
+    }
 }

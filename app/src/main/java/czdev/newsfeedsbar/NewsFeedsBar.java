@@ -61,14 +61,11 @@ import com.sun.org.apache.regexp.internal.RE;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
-import static android.content.Context.MODE_PRIVATE;
-import static czdev.newsfeedsbar.SettingsActivity.TAG_LOG;
+import static czdev.newsfeedsbar.Constants.*;
 
 
 public class NewsFeedsBar extends AppCompatActivity {
 
-    public static String TAG_LOG = "NewsBar";
     NotificationCompat.Builder mBuilder;
     public static FloatingActionButton fab;
     Animation animSideDown;
@@ -76,7 +73,7 @@ public class NewsFeedsBar extends AppCompatActivity {
     public int  mLanguageId= 0;
     public Set<String> mRessources = null;
     public static Feed mFeed;
-
+    public static SharedPreferences mPrefs;
     public static ListView listView = null;
     public static  Context mContext = null;
     public static SharedPreferences sharedPreferences = null;
@@ -99,10 +96,16 @@ public class NewsFeedsBar extends AppCompatActivity {
             mFeed = SplashScreen.retrieveFeedTask.getFeed();
         }else
         {
+            mFeed = getSavedFeeds();
+        }
+
+        if(mFeed == null /*get latest news*/)
+        {
             //force reload
             RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false));
             retrieveFeedTask.readUrls();
             mFeed = retrieveFeedTask.getFeed();
+            saveCurrentFeeds(mFeed);
         }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         // refresh handle
@@ -126,9 +129,9 @@ public class NewsFeedsBar extends AppCompatActivity {
                 listView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
             }
             // a. Animate list view slide down
-            animSideDown = AnimationUtils.loadAnimation(getApplicationContext(),
-                    R.anim.slide_down);
-            listView.startAnimation(animSideDown);
+            //animSideDown = AnimationUtils.loadAnimation(getApplicationContext(),
+              //      R.anim.slide_down);
+           // listView.startAnimation(animSideDown);
 
             Snackbar.make(listView, "Click on START Button to show News Bar .. ", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
@@ -154,7 +157,6 @@ public class NewsFeedsBar extends AppCompatActivity {
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
             mBuilder.setContentIntent(pendingIntent);
             fab = (FloatingActionButton) findViewById(R.id.fab);
-            sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
             fab.setImageResource(getServiceNewsStatus()?R.drawable.pause:R.drawable.play);
             //changeLanguageTo("fr");
             fab.setOnClickListener(new View.OnClickListener() {
@@ -261,6 +263,23 @@ public class NewsFeedsBar extends AppCompatActivity {
 
     }
 
+    public void saveCurrentFeeds(Feed tmpFeed) {
+        mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(tmpFeed);
+        prefsEditor.putString("sSavedFeed", json);
+        prefsEditor.commit();
+        Log.v(TAG_LOG,"saveFeed" + tmpFeed);
+
+    }
+    public Feed getSavedFeeds() {
+        Feed tmpFeed = null;
+        mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+        tmpFeed = new Gson().fromJson(mPrefs.getString("sSavedFeed", null), Feed.class);
+        Log.v(TAG_LOG,"getSaved" + tmpFeed.toString());
+        return tmpFeed;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -307,6 +326,7 @@ public class NewsFeedsBar extends AppCompatActivity {
         if (id == R.id.action_refresh) {
             // refresh and change adapter
             refreshListNews();
+            saveCurrentFeeds(mFeed);
             return true;
         }
 

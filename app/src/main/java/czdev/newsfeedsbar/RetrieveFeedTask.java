@@ -45,23 +45,16 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
-import static czdev.newsfeedsbar.SettingsActivity.TAG_LOG;
+import static czdev.newsfeedsbar.Constants.*;
+
 
 /**
  * Async Task to make http call
  */
 public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
 
-    static final String TITLE = "title";
-    static final String DESCRIPTION = "description";
-    static final String LANGUAGE = "language";
-    static final String LINK = "link";
-    static final String AUTHOR = "author";
-    static final String ITEM = "item";
-    static final String PUB_DATE = "pubDate";
     public Context mContext = null;
     private static Feed mFeed;
-    public static final String FEED_PREFS_NAME = "FEED_PREFS";
     SharedPreferences mPrefs;
     SharedPreferences defaultSharedPreferences;
     public int mLanguageId = 0;
@@ -76,12 +69,17 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
 
     public void readUrls() {
         mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
-        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
-        Set<String> ressources = defaultSharedPreferences.getStringSet("news_bar_resources", null );
-        List<String> urls = UrlsParser.getMyurls(mContext, mLanguageId, ressources);
+        Set<String> resources = defaultSharedPreferences.getStringSet("news_bar_resources", null );
+        UrlsParser urlsParser = new UrlsParser(mContext, mLanguageId, resources);
+        urlsParser.execute();
 
-    if(urls != null)
-        execute(urls.toArray(new String[urls.size()]));
+        try {
+            execute(urlsParser.get().toArray(new String[urlsParser.get().size()]));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     private String getCharacterData(XMLEvent event, XMLEventReader eventReader)

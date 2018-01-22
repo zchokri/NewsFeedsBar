@@ -37,14 +37,13 @@ import com.google.gson.Gson;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import static czdev.newsfeedsbar.Constants.*;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class MyService extends Service implements OnClickListener {
 
-    public static final String FEED_PREFS_NAME = "FEED_PREFS";
     SharedPreferences mPrefs;
-    public String TAG_LOG = "NewsBar";
     private View view;
     WindowManager.LayoutParams p = null;
     WindowManager windowManager = null;
@@ -53,7 +52,6 @@ public class MyService extends Service implements OnClickListener {
     public HorizontalScrollView horizontalScrollView = null;
     public LinearLayout linearLayout = null;
     public Animation myRotation = null;
-    private static final long DOUBLE_PRESS_INTERVAL = 250; // in millis
     private long lastPressTime;
     Feed mFeed;
     private boolean isPaused = false;
@@ -67,7 +65,6 @@ public class MyService extends Service implements OnClickListener {
     public int  mRefreshDelay = 0;
     private final Handler handler = new Handler();
     String rssResult = "";
-    int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 10001;
     SharedPreferences defaultSharedPreferences = null;
 
     @Override
@@ -116,7 +113,15 @@ public class MyService extends Service implements OnClickListener {
            RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(this,false));
            retrieveFeedTask.readUrls();
            mFeed = retrieveFeedTask.getFeed();
-        }else {
+
+        }
+
+        if(mFeed == null)
+        {
+            mFeed = getSavedFeeds();
+        }
+        else {
+
             if(SplashScreen.retrieveFeedTask != null) {
                 mFeed = SplashScreen.retrieveFeedTask.getFeed();
             }else
@@ -125,23 +130,39 @@ public class MyService extends Service implements OnClickListener {
                 RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(this,false));
                 retrieveFeedTask.readUrls();
                 mFeed = retrieveFeedTask.getFeed();
+                saveCurrentFeeds(mFeed);
 
             }
         }
         if(mFeed != null) {
-            saveCurrentFeeds();
+            saveCurrentFeeds(mFeed);
         }
         else {
-            mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
-            Gson gson = new Gson();
-            String json = mPrefs.getString("SerializableObject", "");
-            mFeed = gson.fromJson(json, Feed.class);
+            mFeed = getSavedFeeds();
         }
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         //doTheAutoRefresh();
         showWindowManager();
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    public void saveCurrentFeeds(Feed tmpFeed) {
+        mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(tmpFeed);
+        prefsEditor.putString("sSavedFeed", json);
+        prefsEditor.commit();
+        Log.v(TAG_LOG,"saveFeed" + tmpFeed.toString());
+
+    }
+    public Feed getSavedFeeds() {
+        Feed tmpFeed = null;
+        mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+        tmpFeed = new Gson().fromJson(mPrefs.getString("sSavedFeed", null), Feed.class);
+        Log.v(TAG_LOG,"getSaved" + tmpFeed);
+        return tmpFeed;
     }
 
     public void showWindowManager() {
@@ -292,14 +313,6 @@ public class MyService extends Service implements OnClickListener {
 
     }
 
-    public void saveCurrentFeeds() {
-        mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor prefsEditor = mPrefs.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(mFeed);
-        prefsEditor.putString("SerializableObject", json);
-        prefsEditor.commit();
-    }
 
     public void startAutoScroll() {
         DisplayMetrics displaymetrics = getApplicationContext().getResources().getDisplayMetrics();

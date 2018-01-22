@@ -68,8 +68,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
-import static czdev.newsfeedsbar.MyService.FEED_PREFS_NAME;
-import static czdev.newsfeedsbar.NewsFeedsBar.mContext;
+import static czdev.newsfeedsbar.Constants.*;
+
 
 public class SplashScreen extends Activity {
 
@@ -77,9 +77,7 @@ public class SplashScreen extends Activity {
     WindowManager.LayoutParams p;
     public static WindowManager windowManager;
     LayoutInflater layoutInflater;
-    public String TAG_LOG = "NewsBar";
     public static SharedPreferences mPrefs;
-    public final static int REQUEST_CODE = -1010101;
     public static Activity splashActivity;
     public static View view;
 
@@ -137,10 +135,37 @@ public class SplashScreen extends Activity {
              * Showing splashscreen while making network calls to download necessary
              * data before launching the app Will use AsyncTask to make http call
              */
-            retrieveFeedTask = new RetrieveFeedTask(this,true);
-            retrieveFeedTask.readUrls();
-            mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+            if(getSavedFeeds() == null) {
+                retrieveFeedTask = new RetrieveFeedTask(this, true);
+                retrieveFeedTask.readUrls();
+                saveCurrentFeeds(retrieveFeedTask.getFeed());
+            }else
+            {
+                Intent i = new Intent(getBaseContext(), NewsFeedsBar.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+                finish();
+            }
         }
+
+
+    public void saveCurrentFeeds(Feed tmpFeed) {
+        mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(tmpFeed);
+        prefsEditor.putString("sSavedFeed", json);
+        prefsEditor.commit();
+        Log.v(TAG_LOG,"saveFeed" + tmpFeed.toString());
+
+    }
+    public Feed getSavedFeeds() {
+        Feed tmpFeed = null;
+        mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+        tmpFeed = new Gson().fromJson(mPrefs.getString("sSavedFeed", null), Feed.class);
+        Log.v(TAG_LOG,"getSaved" + tmpFeed);
+        return tmpFeed;
+    }
 
 
         @Override

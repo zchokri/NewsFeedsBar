@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import static czdev.newsfeedsbar.Constants.*;
+
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -41,7 +43,6 @@ import java.util.Set;
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
-    public static String TAG_LOG = "NewsBar";
 
     public static MultiSelectListPreference listPreference = null;
     public static Boolean previewEnabled = false;
