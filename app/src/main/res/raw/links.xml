@@ -1,0 +1,18 @@
+<links  xmlns:android="http://schemas.android.com/apk/res/android">
+	<ArabicFrance24>http://www.france24.com/ar/africa/rss</ArabicFrance24>
+	<ArabicFrance24>http://www.france24.com/ar/europe/rss</ArabicFrance24>
+	<ArabicFrance24>http://www.france24.com/ar/middle-east/rss</ArabicFrance24>
+	<ArabicFrance24>http://www.france24.com/ar/americas/rss</ArabicFrance24>
+	<ArabicFrance24>http://www.france24.com/ar/france/rss </ArabicFrance24>
+	<ArabicFrance24>http://www.france24.com/ar/asia-pacific/rss</ArabicFrance24>
+	<FrenshFrance24>http://www.france24.com/fr/actualites/rss</FrenshFrance24>
+	<FrenshFrance24>http://www.france24.com/fr/europe/rss</FrenshFrance24>
+	<FrenshFrance24>http://www.france24.com/fr/france/rss</FrenshFrance24>
+	<FrenshFrance24>http://www.france24.com/fr/afrique/rss</FrenshFrance24>
+	<EnglishFrance24>http://www.france24.com/en/france/rss</EnglishFrance24>
+	<EnglishFrance24>http://www.france24.com/en/africa/rss</EnglishFrance24>
+	<EnglishFrance24>http://www.france24.com/en/top-stories/rss</EnglishFrance24>
+	<ArabicCnn>https://arabic.cnn.com/rss</ArabicCnn>
+	<ArabicCnn>https://arabic.cnn.com/world/rss</ArabicCnn>
+	<ArabicCnn>https://arabic.cnn.com/middle_east/rss</ArabicCnn>
+</links>

@@ -19,13 +19,23 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.sun.org.apache.xerces.internal.parsers.XMLParser;
 
+import org.w3c.dom.Document;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.Array;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -67,21 +77,11 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
 
     public void readUrls() {
         mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
-        switch (mLanguageId)
-        {
-            case 0:
-                mUrls = "http://www.france24.com/ar/africa/rss";
-                break;
-            case 1:
-                mUrls ="http://www.france24.com/fr/afrique/rss";
-                break;
-            case 2:
-            default:
-                mUrls ="http://www.france24.com/en/africa/rss";
-                break;
-        }
-        execute(mUrls);
+        Set<String> ressources = defaultSharedPreferences.getStringSet("news_bar_resources", null );
+        List<String> urls = UrlsParser.getMyurls(mContext, mLanguageId, ressources);
 
+    if(urls != null)
+        execute(urls.toArray(new String[urls.size()]));
     }
 
     private String getCharacterData(XMLEvent event, XMLEventReader eventReader)
@@ -99,8 +99,9 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
         try {
             Feed feed = null;
             boolean isFeedHeader = true;
+            Log.d(TAG_LOG, "urls " + urls );
             for (int i = 0; i < urls.length; i++) {
-                Log.d(TAG_LOG, "url " + i + "   " + urls[i]  );
+                Log.d(TAG_LOG, "url " + i + "   " + urls[i] );
                 URL url = new URL(urls[i]);
                 URLConnection urlCon = url.openConnection();
                 try {
@@ -118,11 +119,11 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
                     XMLInputFactory inputFactory = XMLInputFactory.newInstance();
                     Log.d(TAG_LOG, "First create a new XMLInputFactory " + i + "   " + urls[i]  );
                     // Setup a new eventReader
-                    Log.d(TAG_LOG, "Setup a new eventReader  " + i + "   " + urls[i]  );
+                    Log.d(TAG_LOG, "Setup a new eventReader  " + i + "   " + urls[i]);
                     InputStream in = urlCon.getInputStream();
                     XMLEventReader eventReader = inputFactory.createXMLEventReader(in);
                     // read the XML document
-                    Log.d(TAG_LOG, "read the XML document  " + i + "   " + urls[i]  );
+                    Log.d(TAG_LOG, "read the XML document  " + i + "   " +  urls[i]);
 
                     while (eventReader.hasNext()) {
                         XMLEvent event = eventReader.nextEvent();
