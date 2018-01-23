@@ -297,9 +297,11 @@ public class MyService extends Service {
 
                 @Override
                 public void onDoubleClick(View v) {
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(message.getLink()));
-                    browserIntent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(browserIntent);
+                    Intent ViewIntent = new Intent(getApplicationContext(), ViewURL.class);
+                    ViewIntent.putExtra("link", message.getLink());
+                    ViewIntent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(ViewIntent);
+
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
