@@ -18,6 +18,8 @@
             android:name=".NewsFeedsBar"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ViewURL" />
+        <activity
             android:name=".SplashScreen"
             android:theme="@style/Theme.Transparent">
             <intent-filter>
@@ -40,7 +42,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="czdev.newsfeedsbar.NewsFeedsBar" />
         </activity>
-
     </application>
 
 </manifest>

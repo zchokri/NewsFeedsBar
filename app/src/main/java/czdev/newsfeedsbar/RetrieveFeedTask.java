@@ -60,7 +60,6 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
     public int mLanguageId = 0;
     Boolean mStartMainActivity = false;
 
-
     public RetrieveFeedTask(Context ctx,boolean startMainActivity)  {
         this.mContext = ctx;
         this.mStartMainActivity = startMainActivity;

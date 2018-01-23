@@ -46,6 +46,9 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
@@ -142,8 +145,9 @@ public class NewsFeedsBar extends AppCompatActivity {
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     Object o = listView.getItemAtPosition(i);
                     FeedMessage feedMessage = (FeedMessage) o;
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(feedMessage.getLink()));
-                    startActivity(browserIntent);
+                    Intent ViewIntent = new Intent(mContext, ViewURL.class);
+                    ViewIntent.putExtra("link", feedMessage.getLink());
+                    startActivity(ViewIntent);
                 }
             });
 
