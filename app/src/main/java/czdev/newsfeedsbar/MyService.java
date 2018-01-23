@@ -1,15 +1,21 @@
 package czdev.newsfeedsbar;
 
 import android.app.Service;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -17,13 +23,20 @@ import android.text.TextPaint;
 import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.DragEvent;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.PixelFormat;
@@ -41,7 +54,7 @@ import static czdev.newsfeedsbar.Constants.*;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
-public class MyService extends Service implements OnClickListener {
+public class MyService extends Service {
 
     SharedPreferences mPrefs;
     private View view;
@@ -49,8 +62,18 @@ public class MyService extends Service implements OnClickListener {
     WindowManager windowManager = null;
     LayoutInflater layoutInflater = null;
     View popupView = null;
+    View showHideView = null;
+    private static final int SWIPE_MIN_DISTANCE = 120;
+    private static final int SWIPE_MAX_OFF_PATH = 250;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+    private GestureDetector gestureDetector;
+    View.OnTouchListener gestureListener;
     public HorizontalScrollView horizontalScrollView = null;
     public LinearLayout linearLayout = null;
+    public RelativeLayout relativeLayout = null;
+
+    public Button btnResumeNews = null;
+
     public Animation myRotation = null;
     private long lastPressTime;
     Feed mFeed;
@@ -96,11 +119,6 @@ public class MyService extends Service implements OnClickListener {
         super.onDestroy();
     }
 
-
-    @Override
-    public void onClick(View v) {
-        Toast.makeText(this, "Overlay button click event", Toast.LENGTH_SHORT).show();
-    }
 
 
     @Override
@@ -165,7 +183,34 @@ public class MyService extends Service implements OnClickListener {
         return tmpFeed;
     }
 
-    public void showWindowManager() {
+    class MyGestureDetector extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            return super.onDoubleTap(e);
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            try {
+                // downward swipe
+                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                    Toast.makeText(popupView.getContext(), "Downward Swipe", Toast.LENGTH_SHORT).show();
+                    horizontalScrollView.setVisibility(View.INVISIBLE);
+                    btnResumeNews.setVisibility(View.VISIBLE);
+                }
+              } catch (Exception e) {
+                // nothing
+            }
+            startAutoScroll();
+            return false;
+        }
+
+    }
+
+     public void showWindowManager() {
+
+
+         gestureDetector = new GestureDetector(getApplicationContext(),new MyGestureDetector());
 
         p = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -197,6 +242,15 @@ public class MyService extends Service implements OnClickListener {
         layoutInflater =
                 (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         popupView = layoutInflater.inflate(R.layout.wm_shape, null);
+        relativeLayout = popupView.findViewById(R.id.rl);
+        btnResumeNews = popupView.findViewById(R.id.resumeNewsBar);
+        btnResumeNews.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                horizontalScrollView.setVisibility(View.VISIBLE);
+                btnResumeNews.setVisibility(View.INVISIBLE);
+            }
+        });
         horizontalScrollView = popupView.findViewById(R.id.horizontalScrollView);
         //arbic = 0
         if(mLanguageId == 0)
@@ -222,9 +276,6 @@ public class MyService extends Service implements OnClickListener {
 
             }
 
-            myRotation = AnimationUtils.loadAnimation(popupView.getContext(), R.anim.rotator);
-            myRotation.setRepeatCount(Animation.INFINITE);
-            imageView.startAnimation(myRotation);
             linearLayout.addView(imageView);
             if(boldText && italicText)
                 textView.setTypeface(textView.getTypeface(), Typeface.BOLD_ITALIC);
@@ -236,34 +287,29 @@ public class MyService extends Service implements OnClickListener {
             textView.setTextSize(textSize);
             textView.setText(Html.fromHtml(" - " +message.getTitle() + " - "));
             textView.setGravity(Gravity.CENTER_VERTICAL);
-            textView.setOnClickListener(new View.OnClickListener() {
+            textView.setOnTouchListener(new textViewOnTouchListener());
+            textView.setOnClickListener(new DoubleClickListener() {
+
                 @Override
-                public void onClick(View view) {
-                    Log.d(TAG_LOG, "onClick textView " );
-                    // Get current time in nano seconds.
-                    long pressTime = System.currentTimeMillis();
-                    // If double click...
-                    if (pressTime - lastPressTime <= DOUBLE_PRESS_INTERVAL) {
-                        textView.setBackgroundColor(Color.BLUE);
-                        isPaused = true;
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(message.getLink()));
-                        browserIntent.addFlags(FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(browserIntent);
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        isPaused = false;
-                        textView.setBackgroundColor(Color.parseColor("#808080"));
-                        startAutoScroll();
-                    }
-                    // record the last time the menu button was pressed.
-                    lastPressTime = pressTime;
+                public void onSingleClick(View v) {
 
                 }
+
+                @Override
+                public void onDoubleClick(View v) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(message.getLink()));
+                    browserIntent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(browserIntent);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    isPaused = false;
+                    textView.setBackgroundColor(Color.parseColor("#808080"));
+                    startAutoScroll();
+                }
             });
-            stripUnderlines(textView);
             linearLayout.addView(textView);
             //System.out.println(message);
             rssResult += message.getTitle();
@@ -273,35 +319,7 @@ public class MyService extends Service implements OnClickListener {
 
         windowManager.addView(popupView, p);
 
-        horizontalScrollView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-
-                switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
-                    case MotionEvent.ACTION_DOWN:
-                        isPaused = true;
-                        Log.d(TAG_LOG, "ACTION_DOWN isPaused " + isPaused);
-                        horizontalScrollView.setBackgroundColor(Color.RED);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        Log.d(TAG_LOG, "ACTION_UP isPaused " + isPaused);
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        isPaused = false;
-                        horizontalScrollView.setBackgroundColor(Color.parseColor("#808080"));
-                        startAutoScroll();
-                        break;
-                }
-                return false;
-            }
-
-
-        });
-
-
+        horizontalScrollView.setOnTouchListener(new horizontalScrollViewOnTouchListener());
         startAutoScroll();
         horizontalScrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
             @Override
@@ -312,7 +330,6 @@ public class MyService extends Service implements OnClickListener {
         });
 
     }
-
 
     public void startAutoScroll() {
         DisplayMetrics displaymetrics = getApplicationContext().getResources().getDisplayMetrics();
@@ -350,55 +367,96 @@ public class MyService extends Service implements OnClickListener {
         }, currentSpeed);
 
     }
-    private void doTheAutoRefresh() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","60"));
-                Log.d(TAG_LOG, "refresh time   " + mRefreshDelay);
-                RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(getApplicationContext(),false));
-                retrieveFeedTask.readUrls();
-                mFeed = retrieveFeedTask.getFeed();
-                if(linearLayout != null) {
-                    linearLayout.removeAllViewsInLayout();
-                    linearLayout.removeAllViews();
-                }
-                if(popupView != null) {
-                    windowManager.removeView(popupView);
-                    popupView = null;
-                }
-                if(view != null) {
-                    windowManager.removeView(view);
-                    view = null;
-                }
-                showWindowManager();
-                doTheAutoRefresh();
 
+    private final class horizontalScrollViewOnTouchListener implements View.OnTouchListener {
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+
+            switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    isPaused = true;
+                    Log.d(TAG_LOG, "ACTION_DOWN isPaused " + isPaused);
+                    horizontalScrollView.setBackgroundColor(Color.RED);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    Log.d(TAG_LOG, "ACTION_UP isPaused " + isPaused);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    isPaused = false;
+                    horizontalScrollView.setBackgroundColor(Color.parseColor("#808080"));
+                    startAutoScroll();
+                    break;
             }
-        }, mRefreshDelay * 1000);
+
+            for (int i = 0; i < horizontalScrollView.getChildCount(); i++) {
+                View child = horizontalScrollView.getChildAt(i);
+                if (child.getVisibility() == View.VISIBLE) {
+                    if(child == linearLayout)
+                    {
+                        for (int j = 0; j < linearLayout.getChildCount(); j++) {
+                            View child2 = linearLayout.getChildAt(j);
+                            int[] l = new int[2];
+                            child2.getLocationOnScreen(l);
+                            int x = l[0];
+                            int y = l[1];
+                            DisplayMetrics displaymetrics = getApplicationContext().getResources().getDisplayMetrics();
+                            float screenWidth = displaymetrics.widthPixels;
+                            if (x > screenWidth / 2  && x < (screenWidth + 3/4 * screenWidth)) {
+                                child2.dispatchTouchEvent(motionEvent);
+                            }
+                        }
+                    }
+                }
+            }
+            return gestureDetector.onTouchEvent(motionEvent);
+        }
     }
 
-    private void stripUnderlines(TextView textView) {
-        Spannable s = new SpannableString(textView.getText());
-        URLSpan[] spans = s.getSpans(0, s.length(), URLSpan.class);
-        for (URLSpan span: spans) {
-            int start = s.getSpanStart(span);
-            int end = s.getSpanEnd(span);
-            s.removeSpan(span);
-            span = new URLSpanNoUnderline(span.getURL());
-            s.setSpan(span, start, end, 0);
-        }
-        textView.setText(s);
-    }
+    private final class textViewOnTouchListener implements View.OnTouchListener {
+        public boolean onTouch(View view, MotionEvent motionEvent) {
 
-    private class URLSpanNoUnderline extends URLSpan {
-        public URLSpanNoUnderline(String url) {
-            super(url);
+            switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    isPaused = true;
+                    horizontalScrollView.setBackgroundColor(Color.RED);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    isPaused = false;
+                    horizontalScrollView.setBackgroundColor(Color.parseColor("#808080"));
+                    startAutoScroll();
+                    break;
+            }
+
+            return gestureDetector.onTouchEvent(motionEvent);
+
         }
-        @Override public void updateDrawState(TextPaint ds) {
-            super.updateDrawState(ds);
-            ds.setUnderlineText(false);
-            ds.setColor(Color.WHITE);
+    }
+    public abstract class DoubleClickListener implements OnClickListener {
+
+        private static final long DOUBLE_CLICK_TIME_DELTA = 300;//milliseconds
+
+        long lastClickTime = 0;
+
+        @Override
+        public void onClick(View v) {
+            long clickTime = System.currentTimeMillis();
+            if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA){
+                onDoubleClick(v);
+                lastClickTime = 0;
+            } else {
+                onSingleClick(v);
+            }
+            lastClickTime = clickTime;
         }
+
+        public abstract void onSingleClick(View v);
+        public abstract void onDoubleClick(View v);
     }
 }

@@ -144,6 +144,8 @@ public class SplashScreen extends Activity {
                 Intent i = new Intent(getBaseContext(), NewsFeedsBar.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
+                windowManager.removeView(view);
+                view = null;
                 finish();
             }
         }

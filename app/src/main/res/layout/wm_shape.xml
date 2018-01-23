@@ -7,15 +7,19 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     >
-    <!--
-        To get a circular shape, we need to apply the same value for width and height
-    -->
+    <Button
+        android:id="@+id/resumeNewsBar"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:visibility="invisible"
+        android:background="@drawable/circle_shape"/>
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="25dp"
         android:id="@+id/horizontalScrollView"
         android:layout_gravity="center_vertical"
         android:background="#808080"
+        android:orientation="horizontal"
         android:layoutDirection="rtl"
         android:scrollbars="none" >
         <LinearLayout
@@ -31,6 +35,9 @@
                 android:gravity="bottom"
                 android:text=""/>
         </LinearLayout>
+
+
+
     </HorizontalScrollView>
 
 </RelativeLayout>
