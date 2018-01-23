@@ -24,11 +24,11 @@ public class ViewURL extends AppCompatActivity {
         String link = getIntent().getSerializableExtra("link").toString();
         Log.d(TAG_LOG, "link address =  " + link);
         setContentView(R.layout.activity_urlview);
+        getWindow().setWindowAnimations(R.style.WindowAnimationTransition);
 
         WebView myWebView = (WebView) findViewById(R.id.webview);
-        //Obtain the WebSettings object
-        WebSettings webSettings = myWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
+        //Obtain the WebSettings object and Enable JS
+        myWebView.getSettings().setJavaScriptEnabled(true);
         myWebView.loadUrl(link);
         myWebView.setWebViewClient(new WebViewClient(){
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
