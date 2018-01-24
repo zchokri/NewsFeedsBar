@@ -28,10 +28,12 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
+import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextPaint;
+import android.text.TextWatcher;
 import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -50,12 +52,14 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -89,6 +93,32 @@ public class NewsFeedsBar extends AppCompatActivity {
         super.onAttachedToWindow();
 
         listView = (ListView) findViewById(R.id.listView);
+        SearchView searchView = (SearchView) findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Feed newmFeed = new Feed("","","","","");
+
+                for (FeedMessage feedMessage : mFeed.entries)
+                {
+                    if (feedMessage.getTitle().toLowerCase().contains(newText.toLowerCase()))
+                    {
+                        newmFeed.getMessages().add(feedMessage);
+                    }
+                }
+                CustomListAdapter customListAdapter = new CustomListAdapter(mContext, newmFeed.getMessages());
+                listView.setAdapter(customListAdapter);
+                customListAdapter.notifyDataSetChanged();
+
+                return false;
+            }
+           });
+
 
         mContext = getBaseContext();
         newsBarActivity = this;
