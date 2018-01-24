@@ -52,6 +52,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
@@ -61,14 +62,19 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import com.sun.org.apache.regexp.internal.RE;
+import com.wooplr.spotlight.SpotlightConfig;
+import com.wooplr.spotlight.SpotlightView;
 
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import static czdev.newsfeedsbar.Constants.*;
+import static czdev.newsfeedsbar.SplashScreen.view;
 
 
 public class NewsFeedsBar extends AppCompatActivity {
@@ -86,14 +92,38 @@ public class NewsFeedsBar extends AppCompatActivity {
     public static SharedPreferences sharedPreferences = null;
     SharedPreferences defaultSharedPreferences = null;
     public static Activity newsBarActivity =null;
+    public static SearchView searchView = null;
+    public static MenuItem settingsButton = null;
+    public static MenuItem refreshButton = null;
+    public static SpotlightView play = null;
+    public static SpotlightView search = null;
+    public static SpotlightView settings = null;
+    public static SpotlightView refresh = null;
     private final Handler handler = new Handler();
+    public SpotlightConfig config = null;
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
         listView = (ListView) findViewById(R.id.listView);
-        SearchView searchView = (SearchView) findViewById(R.id.searchView);
+        searchView = (SearchView) findViewById(R.id.searchView);
+        config = new SpotlightConfig();
+        config.setDismissOnBackpress(true);
+        config.setDismissOnTouch(true);
+        config.setLineAndArcColor(Color.parseColor("#eb273f"));
+        config.setSubHeadingTvColor(Color.parseColor("#ffffff"));
+        config.setHeadingTvSize(32);
+        config.setRevealAnimationEnabled(true);
+        config.setHeadingTvColor(Color.parseColor("#eb273f"));
+        config.setFadingTextDuration(400);
+        config.setMaskColor(Color.parseColor("#dc000000"));
+        config.setSubHeadingTvSize(16);
+        config.setLineAnimationDuration(400);
+
+
+
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -121,7 +151,7 @@ public class NewsFeedsBar extends AppCompatActivity {
 
 
         mContext = getBaseContext();
-        newsBarActivity = this;
+         newsBarActivity = this;
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         Log.d(TAG_LOG, "News Bar Running! " + isMyServiceRunning(MyService.class));
@@ -161,16 +191,8 @@ public class NewsFeedsBar extends AppCompatActivity {
                 listView.setTextDirection(View.TEXT_DIRECTION_LTR);
                 listView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
             }
-            // a. Animate list view slide down
-            //animSideDown = AnimationUtils.loadAnimation(getApplicationContext(),
-              //      R.anim.slide_down);
-           // listView.startAnimation(animSideDown);
 
-            Snackbar.make(listView, "Click on START Button to show News Bar .. ", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-            //end of Animate list view slide down
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     Object o = listView.getItemAtPosition(i);
@@ -193,9 +215,12 @@ public class NewsFeedsBar extends AppCompatActivity {
             fab = (FloatingActionButton) findViewById(R.id.fab);
             fab.setImageResource(getServiceNewsStatus()?R.drawable.pause:R.drawable.play);
             //changeLanguageTo("fr");
+            get_Started();
+
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
 
 
                     if(getServiceNewsStatus())
@@ -214,6 +239,17 @@ public class NewsFeedsBar extends AppCompatActivity {
             Snackbar.make(listView, "Please check your network connection ", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
         }
+    }
+
+    private void get_Started() {
+         play  = new SpotlightView.Builder(this)
+                 .setConfiguration(config)
+                .headingTvText("Play News Bar")
+                .subHeadingTvText("Click Play to start \nNews bar.")
+                .target(fab)
+                .enableDismissAfterShown(true)
+                .usageId("250") //UNIQUE ID
+                .show();
     }
 
     private void doTheAutoRefresh() {
@@ -292,7 +328,7 @@ public class NewsFeedsBar extends AppCompatActivity {
             CustomListAdapter customListAdapter = new CustomListAdapter(mContext, mFeed.getMessages());
             listView.setAdapter(customListAdapter);
             customListAdapter.notifyDataSetChanged();
-            Snackbar.make(listView, "News updated ", Snackbar.LENGTH_LONG).show();
+            //Toast.makeText(mContext, "News updated ", Toast.LENGTH_LONG).show();
           }
 
     }
@@ -320,9 +356,9 @@ public class NewsFeedsBar extends AppCompatActivity {
         if(SplashScreen.splashActivity != null) {
             SplashScreen.splashActivity.finish();
         }
-        if(SplashScreen.view != null) {
-            SplashScreen.windowManager.removeView(SplashScreen.view);
-            SplashScreen.view = null;
+        if(view != null) {
+            SplashScreen.windowManager.removeView(view);
+            view = null;
         }
         setContentView(R.layout.activity_news_feeds_bar);
     }
@@ -341,6 +377,8 @@ public class NewsFeedsBar extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_app, menu);
+        settingsButton = menu.findItem(R.id.action_settings);
+        refreshButton = menu.findItem(R.id.action_refresh);
         return true;
     }
 
