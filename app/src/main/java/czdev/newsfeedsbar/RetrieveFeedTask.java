@@ -47,6 +47,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
+import static android.content.Context.MODE_PRIVATE;
 import static czdev.newsfeedsbar.Constants.*;
 
 
@@ -61,16 +62,37 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
     SharedPreferences defaultSharedPreferences;
     public int mLanguageId = 0;
     Boolean mStartMainActivity = false;
+    public  static long lastRefreshDate = 0;
+    public  static long currentRefreshDate = 0;
 
     public RetrieveFeedTask(Context ctx,boolean startMainActivity)  {
         this.mContext = ctx;
         this.mStartMainActivity = startMainActivity;
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         Log.d(TAG_LOG, "Try to retreive data RetrieveFeedTask");
+        mPrefs = this.mContext.getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+        lastRefreshDate = mPrefs.getLong("lastRefreshDate",new Date(System.currentTimeMillis()).getTime());
+        currentRefreshDate = new Date(System.currentTimeMillis()).getTime();
+        Log.d(TAG_LOG, "lastRefreshDate " + lastRefreshDate);
+        Log.d(TAG_LOG, "currentRefreshDate " + currentRefreshDate);
+
+        if(currentRefreshDate > (lastRefreshDate + 300000) ) {
+            mPrefs.edit().putLong("currentRefreshDate", lastRefreshDate).apply();
+            mPrefs.edit().putString("refresh_requested", "Yes").apply();
+            Log.d(TAG_LOG, "refresh_requested Yes " );
+
+        }else
+        {
+            mPrefs.edit().putString("refresh_requested", "No").apply();
+            Log.d(TAG_LOG, "refresh_requested No " );
+
+
+        }
 
     }
 
     public void readUrls() {
+
         mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
         Set<String> resources = defaultSharedPreferences.getStringSet("news_bar_resources", null );
         UrlsParser urlsParser = new UrlsParser(mContext, mLanguageId, resources);
@@ -129,6 +151,7 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
                     XMLInputFactory inputFactory = XMLInputFactory.newInstance();
                     // Setup a new eventReader
                     InputStream in = urlCon.getInputStream();
+                    urlCon.setConnectTimeout(5000);
                     XMLEventReader eventReader = inputFactory.createXMLEventReader(in);
 
                     // read the XML document

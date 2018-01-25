@@ -29,7 +29,9 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 
 import android.text.Editable;
@@ -51,21 +53,11 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.HorizontalScrollView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.SearchView;
-import android.widget.TextView;
+
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -74,13 +66,14 @@ import com.sun.org.apache.regexp.internal.RE;
 import com.wooplr.spotlight.SpotlightConfig;
 import com.wooplr.spotlight.SpotlightView;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import static czdev.newsfeedsbar.Constants.*;
 
 
-public class NewsFeedsBar extends AppCompatActivity {
+public class NewsFeedsBar extends AppCompatActivity  {
 
     NotificationCompat.Builder mBuilder;
     public static FloatingActionButton fab;
@@ -104,13 +97,22 @@ public class NewsFeedsBar extends AppCompatActivity {
     public static SpotlightView refresh = null;
     private final Handler handler = new Handler();
     public SpotlightConfig config = null;
-
+    public static AlertDialog  alertConnection = null;
+    public static SwipeRefreshLayout mSwipeRefreshLayout;
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+
+
+        mContext = getBaseContext();
+        newsBarActivity = this;
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
         listView = (ListView) findViewById(R.id.listView);
         searchView = (SearchView) findViewById(R.id.searchView);
+        searchView.onActionViewExpanded();
+        searchView.setIconified(true);
         config = new SpotlightConfig();
         config.setDismissOnBackpress(true);
         config.setDismissOnTouch(true);
@@ -124,8 +126,13 @@ public class NewsFeedsBar extends AppCompatActivity {
         config.setSubHeadingTvSize(16);
         config.setLineAnimationDuration(400);
 
-
-
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshListNews();
+            }
+        });
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -151,11 +158,6 @@ public class NewsFeedsBar extends AppCompatActivity {
                 return false;
             }
            });
-
-
-        mContext = getBaseContext();
-         newsBarActivity = this;
-        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         Log.d(TAG_LOG, "News Bar Running! " + isMyServiceRunning(MyService.class));
         if(SplashScreen.retrieveFeedTask != null) {
@@ -251,16 +253,19 @@ public class NewsFeedsBar extends AppCompatActivity {
         }
     }
 
+
     private  static void alertRequestInternet()
     {
-        new AlertDialog.Builder(newsBarActivity)
-                .setTitle("No Internet Connection")
-                .setMessage("It looks like your internet connection is off. Please turn it " +
-                        "on and try again")
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                }).setIcon(android.R.drawable.ic_dialog_alert).show();
+        if( alertConnection == null) {
+            alertConnection = new AlertDialog.Builder(newsBarActivity)
+                    .setTitle("No Internet Connection")
+                    .setMessage("It looks like your internet connection is off. Please turn it " +
+                            "on and try again")
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    }).setIcon(android.R.drawable.ic_dialog_alert).show();
+        }
 
     }
     private void get_Started() {
@@ -337,30 +342,38 @@ public class NewsFeedsBar extends AppCompatActivity {
 
     public static void refreshListNews() {
         //force reload
+
         RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false));
-        retrieveFeedTask.readUrls();
-        mFeed = retrieveFeedTask.getFeed();
-        if (mFeed != null) {
-            CustomListAdapter customListAdapter = new CustomListAdapter(mContext, mFeed.getMessages());
-            listView.setAdapter(customListAdapter);
-            customListAdapter.notifyDataSetChanged();
-            Toast.makeText(mContext, "News updated ", Toast.LENGTH_LONG).show();
+        if(mPrefs.getString("refresh_requested","Yes").contains("Yes")) {
+            retrieveFeedTask.readUrls();
+            mFeed = retrieveFeedTask.getFeed();
+            if (mFeed != null) {
+                CustomListAdapter customListAdapter = new CustomListAdapter(mContext, mFeed.getMessages());
+                listView.setAdapter(customListAdapter);
+                customListAdapter.notifyDataSetChanged();
+                saveCurrentFeeds(mFeed);
+                mSwipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(mContext, "News updated ", Toast.LENGTH_LONG).show();
+            } else {
+                alertRequestInternet();
+            }
         }else
         {
-            alertRequestInternet();
+            Log.v(TAG_LOG, "refresh_requested => " + mPrefs.getString("refresh_requested","Yes"));
+            mSwipeRefreshLayout.setRefreshing(false);
+
         }
 
     }
 
-    public void saveCurrentFeeds(Feed tmpFeed) {
+    public static void saveCurrentFeeds(Feed tmpFeed) {
         if(tmpFeed != null) {
-            mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+            mPrefs = mContext.getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
             SharedPreferences.Editor prefsEditor = mPrefs.edit();
             Gson gson = new Gson();
             String json = gson.toJson(tmpFeed);
             prefsEditor.putString("sSavedFeed", json);
             prefsEditor.commit();
-            Log.v(TAG_LOG, "saveFeed" + tmpFeed);
         }
 
     }
@@ -368,7 +381,6 @@ public class NewsFeedsBar extends AppCompatActivity {
         Feed tmpFeed = null;
         mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
         tmpFeed = new Gson().fromJson(mPrefs.getString("sSavedFeed", null), Feed.class);
-        Log.v(TAG_LOG,"getSaved" + tmpFeed.toString());
         return tmpFeed;
     }
     @Override
@@ -400,8 +412,6 @@ public class NewsFeedsBar extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_app, menu);
-        settingsButton = menu.findItem(R.id.action_settings);
-        refreshButton = menu.findItem(R.id.action_refresh);
         return true;
     }
 
@@ -417,14 +427,6 @@ public class NewsFeedsBar extends AppCompatActivity {
             startActivity(new Intent(NewsFeedsBar.this, SettingsActivity.class));
             return true;
         }
-
-        if (id == R.id.action_refresh) {
-            // refresh and change adapter
-            refreshListNews();
-            saveCurrentFeeds(mFeed);
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 

@@ -6,23 +6,38 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+    <android.support.v7.widget.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_search_view"
+        android:iconifiedByDefault="true"
+        app:defaultQueryHint="Type something..."
+        app:queryHint="Type something..." />
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_below="@id/searchView"
+        android:layout_height="match_parent">
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        app:layout_constraintStart_toStartOf="parent"
+        android:id="@+id/swiperefresh"
+        android:layout_marginTop="50dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <ListView
         android:id="@+id/listView"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="50dp"
         android:layout_weight="1"
         android:divider="#FFFFFF"
         android:listSelector="@drawable/list_selector"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView" />
+        app:layout_constraintTop_toTopOf="@+id/searchView" />
 
-    <SearchView
-        android:id="@+id/searchView"
-        android:layout_width="fill_parent"
-        android:layout_height="37dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginStart="1dp"
-        android:background="@drawable/bg_search_view"
-        app:layout_constraintEnd_toEndOf="parent" />
-
+    </android.support.v4.widget.SwipeRefreshLayout>
+    </RelativeLayout>
 </android.support.constraint.ConstraintLayout>
