@@ -15,4 +15,12 @@
 	<ArabicCnn>https://arabic.cnn.com/rss</ArabicCnn>
 	<ArabicCnn>https://arabic.cnn.com/world/rss</ArabicCnn>
 	<ArabicCnn>https://arabic.cnn.com/middle_east/rss</ArabicCnn>
+    <EnglishCNN>http://rss.cnn.com/rss/edition.rss</EnglishCNN>
+    <EnglishCNN>http://rss.cnn.com/rss/edition_world.rss</EnglishCNN>
+	<ArabicAlJazzeera>http://www.aljazeera.net/aljazeerarss/be46a341-fe26-41f1-acab-b6ed9c198b19/e6aef64d-084c-42f0-8269-abe48e0cd154</ArabicAlJazzeera>
+	<EnglishAlJazzeera>http://www.aljazeera.com/xml/rss/all.xml</EnglishAlJazzeera>
+	<FrenshAlJazzeera>http://www.aljazeera.com/xml/rss/all.xml</FrenshAlJazzeera>
+	<ArabicBBC>http://feeds.bbci.co.uk/arabic/rss.xml</ArabicBBC>
+	<EnglishBBC>http://feeds.bbci.co.uk/news/technology/rss.xml</EnglishBBC>
+	<FrenshBBC>http://feeds.bbci.co.uk/news/rss.xml</FrenshBBC>
 </links>

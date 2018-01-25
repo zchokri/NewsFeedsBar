@@ -247,6 +247,9 @@ public class MyService extends Service {
             } if(message.getLink().contains("jaze")) {
                 imageView.setImageResource(R.drawable.jsc);
 
+            }if(message.getLink().contains("bbc")) {
+                imageView.setImageResource(R.drawable.bbc);
+
             }
 
             linearLayout.addView(imageView);

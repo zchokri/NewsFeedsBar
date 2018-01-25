@@ -68,6 +68,9 @@ public class CustomListAdapter  extends BaseAdapter {
         } if(feedMessage.getLink().contains("jaze")) {
             holder.flagView.setImageResource(R.drawable.jsc);
 
+        } if(feedMessage.getLink().contains("bbc")) {
+            holder.flagView.setImageResource(R.drawable.bbc);
+
         }
 
             return convertView;

@@ -83,6 +83,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     preference.getKey().equals("news_day")
                     ) {
 
+                NewsFeedsBar.refreshListNews(true);
+
+
                 if (previewEnabled) {
                         NewsFeedsBar.restartServiceNews(true);
                     }else

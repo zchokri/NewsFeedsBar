@@ -6,10 +6,12 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
@@ -61,6 +63,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
     public SpotlightConfig config = null;
     public static AlertDialog  alertConnection = null;
     public static SwipeRefreshLayout mSwipeRefreshLayout;
+    ComponentName component;
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -70,6 +73,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
         mContext = getBaseContext();
         newsBarActivity = this;
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        component = new ComponentName(mContext, NetworkStateReceiver.class);
 
         listView = (ListView) findViewById(R.id.listView);
         searchView = (SearchView) findViewById(R.id.searchView);
@@ -327,7 +331,6 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
     public static void refreshListNews(boolean force_refresh) {
         //force reload
-        mSwipeRefreshLayout.setRefreshing(true);
         RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false, force_refresh));
         if(mPrefs.getString("refresh_requested","Yes").contains("Yes")) {
             retrieveFeedTask.readUrls();
@@ -337,7 +340,6 @@ public class NewsFeedsBar extends AppCompatActivity  {
                 listView.setAdapter(customListAdapter);
                 customListAdapter.notifyDataSetChanged();
                 saveCurrentFeeds(mFeed);
-                mSwipeRefreshLayout.setRefreshing(false);
                 Toast.makeText(mContext, "News updated ", Toast.LENGTH_LONG).show();
             } else {
                 alertRequestInternet();
@@ -345,18 +347,20 @@ public class NewsFeedsBar extends AppCompatActivity  {
         }else
         {
             Log.v(TAG_LOG, "refresh_requested => " + mPrefs.getString("refresh_requested","Yes"));
-            mSwipeRefreshLayout.setRefreshing(false);
-            if(mFeed != null) {
-                Toast.makeText(mContext, "News already updated ", Toast.LENGTH_LONG).show();
-            }
             if (!isNetworkConnected()) {
                 alertRequestInternet();
+            }else {
+                if (mFeed != null) {
+                    Toast.makeText(mContext, "News already updated ", Toast.LENGTH_LONG).show();
+                }
             }
+
 
 
         }
 
     }
+
 
     public static void saveCurrentFeeds(Feed tmpFeed) {
         if(tmpFeed != null) {
@@ -424,9 +428,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
     @Override
     protected void onDestroy() {
-        //Intent svc = new Intent(mContext, MyService.class);
-       // svc.putExtra("feed_key", feed);
-       // startService(svc);
+        mContext.getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_DISABLED , PackageManager.DONT_KILL_APP);
         super.onDestroy();
     }
 
