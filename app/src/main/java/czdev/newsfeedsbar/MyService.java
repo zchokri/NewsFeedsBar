@@ -101,7 +101,7 @@ public class MyService extends Service {
 
         if(intent  != null && intent.getAction().toString().equals("reload"))
         {
-           RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(this,false));
+           RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(this,false, true));
            retrieveFeedTask.readUrls();
            mFeed = retrieveFeedTask.getFeed();
 
@@ -118,7 +118,7 @@ public class MyService extends Service {
             }else
             {
                 //force reload
-                RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(this,false));
+                RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(this,false,false));
                 retrieveFeedTask.readUrls();
                 mFeed = retrieveFeedTask.getFeed();
                 saveCurrentFeeds(mFeed);

@@ -43,7 +43,7 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
     public  static long lastRefreshDate = new Date(System.currentTimeMillis()).getTime();
     public  static long currentRefreshDate = lastRefreshDate;
 
-    public RetrieveFeedTask(Context ctx,boolean startMainActivity)  {
+    public RetrieveFeedTask(Context ctx,boolean startMainActivity, boolean force_refresh)  {
         this.mContext = ctx;
         this.mStartMainActivity = startMainActivity;
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -53,7 +53,7 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
         Log.d(TAG_LOG, "lastRefreshDate " + lastRefreshDate);
         Log.d(TAG_LOG, "currentRefreshDate " + currentRefreshDate);
 
-        if(currentRefreshDate > (lastRefreshDate + 60000) ) {
+        if((currentRefreshDate > (lastRefreshDate + 60000) )|| force_refresh) {
             lastRefreshDate = currentRefreshDate;
 
             mPrefs.edit().putString("refresh_requested", "Yes").apply();

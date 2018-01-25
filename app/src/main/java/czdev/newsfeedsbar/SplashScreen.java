@@ -79,7 +79,7 @@ public class SplashScreen extends AppCompatActivity {
                 @Override
                 public void run() {
                     if(getSavedFeeds() == null && isNetworkConnected()) {
-                        retrieveFeedTask = new RetrieveFeedTask(getBaseContext(), true);
+                        retrieveFeedTask = new RetrieveFeedTask(getBaseContext(), true,false);
                         retrieveFeedTask.readUrls();
                         if(retrieveFeedTask.getFeed() != null) {
                             saveCurrentFeeds(retrieveFeedTask.getFeed());

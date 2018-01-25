@@ -14,14 +14,32 @@
         android:enabled="true"
         android:key="Contacts"
         android:title="Contact :"
-        android:summary="c.zagrouba@gmail.com" />
+        android:summary="@string/my_link" />
 
     <Preference
         android:selectable="false"
         android:enabled="true"
-        android:key="Contacts"
-        android:title="Legal information"
-        android:summary="RSS (Rich Site Summary; originally RDF Site Summary; often called Really Simple Syndication) is a type of web feed[2] which allows users to access updates to online content in a standardized, computer-readable format. These feeds can, for example, allow a user to keep track of many different websites in a single news aggregator. The news aggregator will automatically check the RSS feed for new content, allowing the content to be automatically passed from website to website or from website to user. This passing of content is called web syndication. Websites usually use RSS feeds to publish frequently updated information, such as blog entries, news headlines, audio, video. An RSS document  includes full or summarized text, and metadata, like publishing date and author's name." />
+        android:title="CNN Arabic"
+        android:summary="http://archive.arabic.cnn.com/rss/ يمكن استخدام خدمة RSS فقط من خلال تلك البرامج التي توفر رابطا فاعلا، الذي يقوم عند الدخول إليه، بنقل المستخدم مباشرة إلى مشاهدة المقال بالكامل على موقع CNN لا يمكنك مشاهدة محتوى RSS بطريقة لا تسمح بالربط الناجح أو التحويل أو التوصيل إلى صفحة موقع (CNN بالعربية) الملائمة. ولا يمكنك إدخال أي صفحة وسيطة أو صفحة لشد الانتباه أو محتوى آخر بين رابط RSS وصفحة موقع CNN الملائمة.
+" />
+    <Preference
+        android:selectable="false"
+        android:enabled="true"
+        android:title="© 2015 Aljazeera Media Network"
+        android:summary="http://www.aljazeera.com/xml/rss/all.xml" />
+    <Preference
+        android:selectable="false"
+        android:enabled="true"
+        android:title="BBC News"
+        android:summary="http://www.bbc.com/news/10628494, If you run your own website, you can display the latest headlines from other websites on your own site using RSS.
+
+\n We encourage the use of BBC News feeds as part of a website, however, we do require that the proper format and attribution is used when BBC News content appears. The attribution text should read BBC News or bbc.co.uk/news as appropriate. You may not use any BBC logo or other BBC trademark . We reserve the right to prevent the distribution of BBC News content and the BBC does not accept any liability for its feeds. Please see our Terms of Use for full details." />
+
+    <Preference
+        android:selectable="false"
+        android:enabled="true"
+        android:title="France 24"
+        android:summary="http://www.france24.com/static/infographies/fluxrss/fr/page_flux_rss_fr.html" />
     <!-- This preference simply launches an intent when selected. Use this UI sparingly, per
          design guidelines. -->
     </PreferenceScreen>

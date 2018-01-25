@@ -92,7 +92,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshListNews();
+                refreshListNews(false);
             }
         });
 
@@ -132,7 +132,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
         if(mFeed == null /*get latest news*/)
         {
             //force reload
-            RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false));
+            RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false, false));
             retrieveFeedTask.readUrls();
             mFeed = retrieveFeedTask.getFeed();
             saveCurrentFeeds(mFeed);
@@ -209,29 +209,31 @@ public class NewsFeedsBar extends AppCompatActivity  {
             //changeLanguageTo("fr");
             get_Started();
 
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-
-
-                    if(getServiceNewsStatus())
-                    {
-                        stopServiceNews();
-                        defaultSharedPreferences.edit().putBoolean("show_preview",false).commit();
-                    }else {
-                        startServiceNews(false);
-                        defaultSharedPreferences.edit().putBoolean("show_preview",true).commit();
-                    }
-                }
-            });
-
         }else
         {
             if (!isNetworkConnected()) {
                 alertRequestInternet();
             }
         }
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+
+                if(getServiceNewsStatus())
+                {
+                    stopServiceNews();
+                    defaultSharedPreferences.edit().putBoolean("show_preview",false).commit();
+                }else if(mFeed != null)
+                {
+                    startServiceNews(false);
+                    defaultSharedPreferences.edit().putBoolean("show_preview",true).commit();
+                }
+            }
+        });
+
     }
 
 
@@ -266,11 +268,13 @@ public class NewsFeedsBar extends AppCompatActivity  {
             public void run() {
                 if(getServiceNewsStatus())
                 {
-                    restartServiceNews(true);
+                    stopServiceNews();
                 }
-                mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","60"));
+                mRefreshDelay = Integer.parseInt(defaultSharedPreferences.getString("news_bar_refresh_delay","300"));
                 Log.d(TAG_LOG, "refresh time   " + mRefreshDelay);
-                refreshListNews();
+                refreshListNews(false);
+                if(getServiceNewsStatus())
+                startServiceNews(false);
                 doTheAutoRefresh();
             }
         }, mRefreshDelay * 1000);
@@ -321,10 +325,10 @@ public class NewsFeedsBar extends AppCompatActivity  {
         return sharedPreferences.getBoolean("service_status", false);
     }
 
-    public static void refreshListNews() {
+    public static void refreshListNews(boolean force_refresh) {
         //force reload
-
-        RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false));
+        mSwipeRefreshLayout.setRefreshing(true);
+        RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false, force_refresh));
         if(mPrefs.getString("refresh_requested","Yes").contains("Yes")) {
             retrieveFeedTask.readUrls();
             mFeed = retrieveFeedTask.getFeed();
@@ -342,6 +346,13 @@ public class NewsFeedsBar extends AppCompatActivity  {
         {
             Log.v(TAG_LOG, "refresh_requested => " + mPrefs.getString("refresh_requested","Yes"));
             mSwipeRefreshLayout.setRefreshing(false);
+            if(mFeed != null) {
+                Toast.makeText(mContext, "News already updated ", Toast.LENGTH_LONG).show();
+            }
+            if (!isNetworkConnected()) {
+                alertRequestInternet();
+            }
+
 
         }
 
@@ -382,9 +393,9 @@ public class NewsFeedsBar extends AppCompatActivity  {
         }
         return false;
     }
-    private  boolean isNetworkConnected() {
+    private static boolean isNetworkConnected() {
         ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE); // 1
+                mContext.getSystemService(Context.CONNECTIVITY_SERVICE); // 1
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo(); // 2
         return networkInfo != null && networkInfo.isConnected(); // 3
     }
