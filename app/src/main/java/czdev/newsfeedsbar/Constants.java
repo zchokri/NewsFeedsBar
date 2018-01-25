@@ -1,6 +1,5 @@
 package czdev.newsfeedsbar;
 
-import android.content.Context;
 
 /**
  * Created by Chokri ZAGROUBA on 22/01/2018.
