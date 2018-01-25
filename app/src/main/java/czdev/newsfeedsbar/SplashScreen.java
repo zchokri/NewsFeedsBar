@@ -15,6 +15,8 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
@@ -73,20 +75,25 @@ public class SplashScreen extends AppCompatActivity {
             mProgressDialog.show();
 
             Log.d(TAG_LOG,"startSplashScreen");
-            if(getSavedFeeds() == null && isNetworkConnected()) {
-                retrieveFeedTask = new RetrieveFeedTask(this, true);
-                retrieveFeedTask.readUrls();
-                if(retrieveFeedTask.getFeed() != null) {
-                    saveCurrentFeeds(retrieveFeedTask.getFeed());
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(getSavedFeeds() == null && isNetworkConnected()) {
+                        retrieveFeedTask = new RetrieveFeedTask(getBaseContext(), true);
+                        retrieveFeedTask.readUrls();
+                        if(retrieveFeedTask.getFeed() != null) {
+                            saveCurrentFeeds(retrieveFeedTask.getFeed());
+                        }
+                    }else
+                    {
+                        Intent i = new Intent(getBaseContext(), NewsFeedsBar.class);
+                        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(i);
+                        mProgressDialog.dismiss();
+                        finish();
+                    }
                 }
-            }else
-            {
-                Intent i = new Intent(getBaseContext(), NewsFeedsBar.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-                mProgressDialog.dismiss();
-                finish();
-            }
+            }, 200);
         }
 
 
