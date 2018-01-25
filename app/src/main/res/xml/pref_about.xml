@@ -4,15 +4,24 @@
          dismiss it. -->
     <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
     <Preference
-        android:defaultValue="180"
-        android:key="about_news_bar"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_about" />
+        android:selectable="false"
+        android:enabled="true"
+        android:title="Copyright (c) 2018 czdev"
+        android:summary="Chokri ZAGROUBA and Mohamed Lahmadi" />
 
+    <Preference
+        android:selectable="false"
+        android:enabled="true"
+        android:key="Contacts"
+        android:title="Contact :"
+        android:summary="c.zagrouba@gmail.com" />
+
+    <Preference
+        android:selectable="false"
+        android:enabled="true"
+        android:key="Contacts"
+        android:title="Legal information"
+        android:summary="RSS (Rich Site Summary; originally RDF Site Summary; often called Really Simple Syndication) is a type of web feed[2] which allows users to access updates to online content in a standardized, computer-readable format. These feeds can, for example, allow a user to keep track of many different websites in a single news aggregator. The news aggregator will automatically check the RSS feed for new content, allowing the content to be automatically passed from website to website or from website to user. This passing of content is called web syndication. Websites usually use RSS feeds to publish frequently updated information, such as blog entries, news headlines, audio, video. An RSS document  includes full or summarized text, and metadata, like publishing date and author's name." />
     <!-- This preference simply launches an intent when selected. Use this UI sparingly, per
          design guidelines. -->
-    <Preference android:title="@string/pref_title_system_sync_settings">
-    </Preference>
-
-</PreferenceScreen>
+    </PreferenceScreen>
