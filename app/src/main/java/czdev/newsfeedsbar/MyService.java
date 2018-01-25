@@ -1,41 +1,24 @@
 package czdev.newsfeedsbar;
 
 import android.app.Service;
-import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.TextPaint;
-import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,7 +31,6 @@ import android.view.WindowManager;
 import com.google.gson.Gson;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import static czdev.newsfeedsbar.Constants.*;
 
@@ -62,20 +44,13 @@ public class MyService extends Service {
     WindowManager windowManager = null;
     LayoutInflater layoutInflater = null;
     View popupView = null;
-    View showHideView = null;
-    private static final int SWIPE_MIN_DISTANCE = 120;
     private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
     private GestureDetector gestureDetector;
-    View.OnTouchListener gestureListener;
     public HorizontalScrollView horizontalScrollView = null;
     public LinearLayout linearLayout = null;
     public RelativeLayout relativeLayout = null;
-
     public Button btnResumeNews = null;
-
-    public Animation myRotation = null;
-    private long lastPressTime;
     Feed mFeed;
     private boolean isPaused = false;
     public int scrollX = 0;
@@ -85,8 +60,6 @@ public class MyService extends Service {
     public int mLanguageId = 0;
     public int currentSpeed = 0;
     public int textSize = 0;
-    public int  mRefreshDelay = 0;
-    private final Handler handler = new Handler();
     String rssResult = "";
     SharedPreferences defaultSharedPreferences = null;
 

@@ -10,52 +10,17 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Path;
-import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
-import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.NetworkOnMainThreadException;
-import android.preference.PreferenceManager;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
-import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.View;
-import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.AnimationUtils;
-import android.widget.AbsoluteLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.MediaController;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
-import android.widget.TextView;
-import android.widget.VideoView;
-
 import com.google.gson.Gson;
 
 import static czdev.newsfeedsbar.Constants.*;
@@ -70,7 +35,6 @@ public class SplashScreen extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void checkDrawOverlayPermission() {
         Log.v("App", "Package Name: " + getApplicationContext().getPackageName());
-
         /** check if we already  have permission to draw over other apps**/
         if (!Settings.canDrawOverlays(this)) {
             Log.v("App", "Requesting Permission" + Settings.canDrawOverlays(this));
@@ -111,20 +75,25 @@ public class SplashScreen extends AppCompatActivity {
             mProgressDialog.show();
 
             Log.d(TAG_LOG,"startSplashScreen");
-            if(getSavedFeeds() == null && isNetworkConnected()) {
-                retrieveFeedTask = new RetrieveFeedTask(this, true);
-                retrieveFeedTask.readUrls();
-                if(retrieveFeedTask.getFeed() != null) {
-                    saveCurrentFeeds(retrieveFeedTask.getFeed());
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(getSavedFeeds() == null && isNetworkConnected()) {
+                        retrieveFeedTask = new RetrieveFeedTask(getBaseContext(), true);
+                        retrieveFeedTask.readUrls();
+                        if(retrieveFeedTask.getFeed() != null) {
+                            saveCurrentFeeds(retrieveFeedTask.getFeed());
+                        }
+                    }else
+                    {
+                        Intent i = new Intent(getBaseContext(), NewsFeedsBar.class);
+                        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(i);
+                        mProgressDialog.dismiss();
+                        finish();
+                    }
                 }
-            }else
-            {
-                Intent i = new Intent(getBaseContext(), NewsFeedsBar.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-                mProgressDialog.dismiss();
-                finish();
-            }
+            }, 200);
         }
 
 
@@ -159,5 +128,5 @@ public class SplashScreen extends AppCompatActivity {
             splashActivity = this;
             setContentView(R.layout.activity_splash);
             startSplashScreen();
-    }
+        }
     }
