@@ -6,6 +6,7 @@ package czdev.newsfeedsbar;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +16,8 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -50,37 +53,20 @@ import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
+import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.google.gson.Gson;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
-
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.XMLEvent;
-
 import static czdev.newsfeedsbar.Constants.*;
 
 
-public class SplashScreen extends Activity {
+public class SplashScreen extends AppCompatActivity {
 
     public static RetrieveFeedTask retrieveFeedTask;
-    WindowManager.LayoutParams p;
-    public static WindowManager windowManager;
-    LayoutInflater layoutInflater;
     public static SharedPreferences mPrefs;
     public static Activity splashActivity;
-    public static View view;
-
+    public static ProgressDialog mProgressDialog;
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void checkDrawOverlayPermission() {
         Log.v("App", "Package Name: " + getApplicationContext().getPackageName());
@@ -115,42 +101,39 @@ public class SplashScreen extends Activity {
 
         public void startSplashScreen()
         {
-            p = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    Build.VERSION.SDK_INT > Build.VERSION_CODES.O
-                            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-                            : WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    PixelFormat.TRANSLUCENT);
-
-
-            p.gravity = Gravity.CENTER;
-
-            windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-            layoutInflater =
-                    (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-            view = layoutInflater.inflate(R.layout.activity_splash, null);
-            windowManager.addView(view, p);
             /**
              * Showing splashscreen while making network calls to download necessary
              * data before launching the app Will use AsyncTask to make http call
              */
-            if(getSavedFeeds() == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage("Please wait...");
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+
+            Log.d(TAG_LOG,"startSplashScreen");
+            if(getSavedFeeds() == null && isNetworkConnected()) {
                 retrieveFeedTask = new RetrieveFeedTask(this, true);
                 retrieveFeedTask.readUrls();
-                saveCurrentFeeds(retrieveFeedTask.getFeed());
+                if(retrieveFeedTask.getFeed() != null) {
+                    saveCurrentFeeds(retrieveFeedTask.getFeed());
+                }
             }else
             {
                 Intent i = new Intent(getBaseContext(), NewsFeedsBar.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
-                windowManager.removeView(view);
-                view = null;
+                mProgressDialog.dismiss();
                 finish();
             }
         }
 
 
+    private  boolean isNetworkConnected() {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE); // 1
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo(); // 2
+        return networkInfo != null && networkInfo.isConnected(); // 3
+    }
     public void saveCurrentFeeds(Feed tmpFeed) {
         mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = mPrefs.edit();
@@ -170,21 +153,11 @@ public class SplashScreen extends Activity {
     }
 
 
-        @Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
             splashActivity = this;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Log.v("App","Build Version Greater than or equal to M: "+Build.VERSION_CODES.M);
-                checkDrawOverlayPermission();
-            }else{
-                Log.v("App","OS Version Less than M");
-                //No need for Permission as less then M OS.
-                startSplashScreen();
-            }
-
-
+            setContentView(R.layout.activity_splash);
+            startSplashScreen();
     }
-
-
     }

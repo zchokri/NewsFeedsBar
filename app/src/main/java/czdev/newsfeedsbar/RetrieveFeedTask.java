@@ -35,6 +35,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 import javax.xml.parsers.DocumentBuilder;
@@ -64,6 +66,8 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
         this.mContext = ctx;
         this.mStartMainActivity = startMainActivity;
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        Log.d(TAG_LOG, "Try to retreive data RetrieveFeedTask");
+
     }
 
     public void readUrls() {
@@ -100,7 +104,6 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
     private int getNewsDaySelected()
     {
         String day = defaultSharedPreferences.getString("news_day","0");
-        Log.d(TAG_LOG, "News day = "+  day);
         return Integer.parseInt(day);
     }
 

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,10 +16,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
@@ -74,7 +78,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import static czdev.newsfeedsbar.Constants.*;
-import static czdev.newsfeedsbar.SplashScreen.view;
 
 
 public class NewsFeedsBar extends AppCompatActivity {
@@ -172,7 +175,13 @@ public class NewsFeedsBar extends AppCompatActivity {
         }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         // refresh handle
-        doTheAutoRefresh();
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                doTheAutoRefresh();
+            }
+        }, 5000);
+
         setSupportActionBar(toolbar);
 
         if(mFeed != null) {
@@ -236,16 +245,29 @@ public class NewsFeedsBar extends AppCompatActivity {
 
         }else
         {
-            Snackbar.make(listView, "Please check your network connection ", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            if (!isNetworkConnected()) {
+                alertRequestInternet();
+            }
         }
     }
 
+    private  static void alertRequestInternet()
+    {
+        new AlertDialog.Builder(newsBarActivity)
+                .setTitle("No Internet Connection")
+                .setMessage("It looks like your internet connection is off. Please turn it " +
+                        "on and try again")
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).setIcon(android.R.drawable.ic_dialog_alert).show();
+
+    }
     private void get_Started() {
          play  = new SpotlightView.Builder(this)
                  .setConfiguration(config)
-                .headingTvText("Play News Bar")
-                .subHeadingTvText("Click Play to start \nNews bar.")
+                .headingTvText("Play Breaking News Bar")
+                .subHeadingTvText("Click Play to start \nBreaking and latest News bar.")
                 .target(fab)
                 .enableDismissAfterShown(true)
                 .usageId("250") //UNIQUE ID
@@ -318,29 +340,28 @@ public class NewsFeedsBar extends AppCompatActivity {
         RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false));
         retrieveFeedTask.readUrls();
         mFeed = retrieveFeedTask.getFeed();
-        if (mFeed == null) {
-            Snackbar.make(listView, "Please Check your Internet connection", Snackbar.LENGTH_LONG)
-                    .setActionTextColor(Color.RED)
-                    .setAction("Action", null).show();
-
-        } else
-        {
+        if (mFeed != null) {
             CustomListAdapter customListAdapter = new CustomListAdapter(mContext, mFeed.getMessages());
             listView.setAdapter(customListAdapter);
             customListAdapter.notifyDataSetChanged();
-            //Toast.makeText(mContext, "News updated ", Toast.LENGTH_LONG).show();
-          }
+            Toast.makeText(mContext, "News updated ", Toast.LENGTH_LONG).show();
+        }else
+        {
+            alertRequestInternet();
+        }
 
     }
 
     public void saveCurrentFeeds(Feed tmpFeed) {
-        mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor prefsEditor = mPrefs.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(tmpFeed);
-        prefsEditor.putString("sSavedFeed", json);
-        prefsEditor.commit();
-        Log.v(TAG_LOG,"saveFeed" + tmpFeed);
+        if(tmpFeed != null) {
+            mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
+            SharedPreferences.Editor prefsEditor = mPrefs.edit();
+            Gson gson = new Gson();
+            String json = gson.toJson(tmpFeed);
+            prefsEditor.putString("sSavedFeed", json);
+            prefsEditor.commit();
+            Log.v(TAG_LOG, "saveFeed" + tmpFeed);
+        }
 
     }
     public Feed getSavedFeeds() {
@@ -356,10 +377,6 @@ public class NewsFeedsBar extends AppCompatActivity {
         if(SplashScreen.splashActivity != null) {
             SplashScreen.splashActivity.finish();
         }
-        if(view != null) {
-            SplashScreen.windowManager.removeView(view);
-            view = null;
-        }
         setContentView(R.layout.activity_news_feeds_bar);
     }
 
@@ -371,6 +388,12 @@ public class NewsFeedsBar extends AppCompatActivity {
             }
         }
         return false;
+    }
+    private  boolean isNetworkConnected() {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE); // 1
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo(); // 2
+        return networkInfo != null && networkInfo.isConnected(); // 3
     }
 
     @Override
