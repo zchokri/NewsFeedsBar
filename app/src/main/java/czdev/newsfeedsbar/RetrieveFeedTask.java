@@ -62,8 +62,8 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
     SharedPreferences defaultSharedPreferences;
     public int mLanguageId = 0;
     Boolean mStartMainActivity = false;
-    public  static long lastRefreshDate = 0;
-    public  static long currentRefreshDate = 0;
+    public  static long lastRefreshDate = new Date(System.currentTimeMillis()).getTime();
+    public  static long currentRefreshDate = lastRefreshDate;
 
     public RetrieveFeedTask(Context ctx,boolean startMainActivity)  {
         this.mContext = ctx;
@@ -71,13 +71,13 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         Log.d(TAG_LOG, "Try to retreive data RetrieveFeedTask");
         mPrefs = this.mContext.getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
-        lastRefreshDate = mPrefs.getLong("lastRefreshDate",new Date(System.currentTimeMillis()).getTime());
         currentRefreshDate = new Date(System.currentTimeMillis()).getTime();
         Log.d(TAG_LOG, "lastRefreshDate " + lastRefreshDate);
         Log.d(TAG_LOG, "currentRefreshDate " + currentRefreshDate);
 
-        if(currentRefreshDate > (lastRefreshDate + 300000) ) {
-            mPrefs.edit().putLong("currentRefreshDate", lastRefreshDate).apply();
+        if(currentRefreshDate > (lastRefreshDate + 60000) ) {
+            lastRefreshDate = currentRefreshDate;
+
             mPrefs.edit().putString("refresh_requested", "Yes").apply();
             Log.d(TAG_LOG, "refresh_requested Yes " );
 
