@@ -6,6 +6,8 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -213,6 +215,25 @@ public class NewsFeedsBar extends AppCompatActivity  {
                     startActivity(ViewIntent);
                 }
             });
+
+            listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                                                    @Override
+                                                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+                                                        Object o = listView.getItemAtPosition(position);
+                                                        FeedMessage feedMessage = (FeedMessage) o;
+
+                                                        String res = "Link copied in press-paper";
+                                                        Toast  toast = Toast.makeText(mContext, res, Toast.LENGTH_SHORT);
+                                                        toast.show();
+                                                        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+
+                                                        ClipData clip = ClipData.newPlainText("label", feedMessage.getLink());
+                                                        clipboard.setPrimaryClip(clip);
+                                                        return false;
+                                                    }
+                                                });
+
 
             mBuilder =
                     new NotificationCompat.Builder(this)
