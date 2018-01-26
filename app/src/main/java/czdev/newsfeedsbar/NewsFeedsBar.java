@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -26,13 +27,16 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import com.google.gson.Gson;
 import com.wooplr.spotlight.SpotlightConfig;
@@ -55,7 +59,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
     public static ListView listView = null;
     public static  Context mContext = null;
     public static SharedPreferences sharedPreferences = null;
-    SharedPreferences defaultSharedPreferences = null;
+    public  static SharedPreferences defaultSharedPreferences = null;
     public static Activity newsBarActivity =null;
     public static SearchView searchView = null;
     public static SpotlightView play = null;
@@ -68,37 +72,8 @@ public class NewsFeedsBar extends AppCompatActivity  {
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        fab = (FloatingActionButton) findViewById(R.id.fab);
 
-
-        mContext = getBaseContext();
-        newsBarActivity = this;
-        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        component = new ComponentName(mContext, NetworkStateReceiver.class);
-
-        listView = (ListView) findViewById(R.id.listView);
-        searchView = (SearchView) findViewById(R.id.searchView);
-        searchView.onActionViewExpanded();
-        searchView.setIconified(true);
-        config = new SpotlightConfig();
-        config.setDismissOnBackpress(true);
-        config.setDismissOnTouch(true);
-        config.setLineAndArcColor(Color.parseColor("#eb273f"));
-        config.setSubHeadingTvColor(Color.parseColor("#ffffff"));
-        config.setHeadingTvSize(32);
-        config.setRevealAnimationEnabled(true);
-        config.setHeadingTvColor(Color.parseColor("#eb273f"));
-        config.setFadingTextDuration(400);
-        config.setMaskColor(Color.parseColor("#dc000000"));
-        config.setSubHeadingTvSize(16);
-        config.setLineAnimationDuration(400);
-
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshListNews(false);
-            }
-        });
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -208,7 +183,6 @@ public class NewsFeedsBar extends AppCompatActivity  {
             Intent resultIntent = new Intent(this, NewsFeedsBar.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
             mBuilder.setContentIntent(pendingIntent);
-            fab = (FloatingActionButton) findViewById(R.id.fab);
             fab.setImageResource(getServiceNewsStatus()?R.drawable.pause:R.drawable.play);
             //changeLanguageTo("fr");
             get_Started();
@@ -250,6 +224,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
                             "on and try again")
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
+                            alertConnection = null;
                         }
                     }).setIcon(android.R.drawable.ic_dialog_alert).show();
         }
@@ -304,7 +279,10 @@ public class NewsFeedsBar extends AppCompatActivity  {
         mContext.startService(svc);
         prefsEditor.putBoolean("service_status", true);
         prefsEditor.commit();
-        fab.setImageResource(R.drawable.pause);
+        defaultSharedPreferences.edit().putBoolean("show_preview",true).commit();
+        if(fab != null) {
+            fab.setImageResource(R.drawable.pause);
+        }
 
     }
 
@@ -319,7 +297,10 @@ public class NewsFeedsBar extends AppCompatActivity  {
         mContext.stopService(svc);
         prefsEditor.putBoolean("service_status", false);
         prefsEditor.commit();
-        fab.setImageResource(R.drawable.play);
+        defaultSharedPreferences.edit().putBoolean("show_preview",false).commit();
+        if(fab != null) {
+            fab.setImageResource(R.drawable.play);
+        }
 
     }
 
@@ -343,6 +324,8 @@ public class NewsFeedsBar extends AppCompatActivity  {
                 Toast.makeText(mContext, "News updated ", Toast.LENGTH_LONG).show();
             } else {
                 alertRequestInternet();
+                Toast.makeText(mContext, "No Internet Connection !  ", Toast.LENGTH_LONG).show();
+
             }
         }else
         {
@@ -358,9 +341,22 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
 
         }
+        mSwipeRefreshLayout.setRefreshing(false);
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+
+            if(resultCode == RESULT_OK){
+                Log.v(TAG_LOG, "refresh_requested RESULT_OK => " + mPrefs.getString("refresh_requested","Yes"));
+            }
+            if (resultCode == RESULT_CANCELED) {
+                Log.v(TAG_LOG, "refresh_requested RESULT_CANCELED => " + mPrefs.getString("refresh_requested","Yes"));
+            }
+        }
+    }
 
     public static void saveCurrentFeeds(Feed tmpFeed) {
         if(tmpFeed != null) {
@@ -383,9 +379,42 @@ public class NewsFeedsBar extends AppCompatActivity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(SplashScreen.splashActivity != null) {
+            if(SplashScreen.mProgressDialog != null) {
+                SplashScreen.mProgressDialog.dismiss();
+            }
             SplashScreen.splashActivity.finish();
         }
         setContentView(R.layout.activity_news_feeds_bar);
+
+        mContext = getBaseContext();
+        newsBarActivity = this;
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        component = new ComponentName(mContext, NetworkStateReceiver.class);
+        initSharedDefaultValues();
+        listView = (ListView) findViewById(R.id.listView);
+        searchView = (SearchView) findViewById(R.id.searchView);
+        searchView.onActionViewExpanded();
+        searchView.setIconified(true);
+        config = new SpotlightConfig();
+        config.setDismissOnBackpress(true);
+        config.setDismissOnTouch(true);
+        config.setLineAndArcColor(Color.parseColor("#eb273f"));
+        config.setSubHeadingTvColor(Color.parseColor("#ffffff"));
+        config.setHeadingTvSize(32);
+        config.setRevealAnimationEnabled(true);
+        config.setHeadingTvColor(Color.parseColor("#eb273f"));
+        config.setFadingTextDuration(400);
+        config.setMaskColor(Color.parseColor("#dc000000"));
+        config.setSubHeadingTvSize(16);
+        config.setLineAnimationDuration(400);
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshListNews(false);
+            }
+        });
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -420,7 +449,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startActivity(new Intent(NewsFeedsBar.this, SettingsActivity.class));
+            startActivityForResult(new Intent(NewsFeedsBar.this, SettingsActivity.class),1);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -428,12 +457,12 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
     @Override
     protected void onDestroy() {
-        mContext.getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_DISABLED , PackageManager.DONT_KILL_APP);
         super.onDestroy();
     }
 
     @Override
     protected void onResume() {
+        refreshListNews(true);
         super.onResume();
 
     }
@@ -466,7 +495,11 @@ public class NewsFeedsBar extends AppCompatActivity  {
         AlertDialog alert = builder.create();
         alert.setCancelable(false);
         alert.show();
+    }
 
+    public void initSharedDefaultValues() {
+
+        mPrefs = mContext.getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
 
     }
 

@@ -7,6 +7,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
+
+import static czdev.newsfeedsbar.NewsFeedsBar.getServiceNewsStatus;
+
 public class NetworkStateReceiver extends BroadcastReceiver {
 
     @Override
@@ -18,7 +22,13 @@ public class NetworkStateReceiver extends BroadcastReceiver {
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
             if (ni != null && ni.getState() == NetworkInfo.State.CONNECTED) {
-                NewsFeedsBar.refreshListNews(true);
+                if(NewsFeedsBar.mContext != null) {
+                    NewsFeedsBar.refreshListNews(true);
+                    if(getServiceNewsStatus()) {
+                        NewsFeedsBar.restartServiceNews(true);
+                    }
+                }
+
                 Log.i("app", "Network " + ni.getTypeName() + " connected");
             } else if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, Boolean.FALSE)) {
                 Log.d("app", "There's no network connectivity");

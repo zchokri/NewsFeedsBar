@@ -70,7 +70,7 @@
     </string-array>
 
     <string name="pref_title_refresh_news_delay">Refresh News Delay</string>
-    <string name="refresh_default_value">60</string>
+    <string name="refresh_default_value">300</string>
     <string-array name="pref_refresh_news_delay_list_titles">
         <item>5 min</item>
         <item>15 min</item>
@@ -140,4 +140,5 @@
 
     <string name="pref_title_refresh_news">Refresh Delay</string>
     <string name="my_link">"<a href="c.zagrouba@gmail.com\">Contact me! Your Welcome c.zagrouba@gmail.com</a>"</string>
+    <string name="label_swipe_to_refresh" translatable="false">Pull to refresh</string>
 </resources>

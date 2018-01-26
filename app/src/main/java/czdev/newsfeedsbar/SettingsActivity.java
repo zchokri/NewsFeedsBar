@@ -20,6 +20,7 @@ import android.support.v4.app.NavUtils;
 import java.util.List;
 import java.util.Locale;
 import static czdev.newsfeedsbar.Constants.*;
+import static czdev.newsfeedsbar.NewsFeedsBar.mPrefs;
 
 
 /**
@@ -60,6 +61,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 {
                     NewsFeedsBar.stopServiceNews();
                     previewEnabled = false;
+
                 }
             }
 
@@ -83,8 +85,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     preference.getKey().equals("news_day")
                     ) {
 
-                NewsFeedsBar.refreshListNews(true);
-
+                    mPrefs.edit().putString("refresh_requested", "Yes").apply();
 
                 if (previewEnabled) {
                         NewsFeedsBar.restartServiceNews(true);

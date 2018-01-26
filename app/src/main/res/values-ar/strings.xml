@@ -72,7 +72,7 @@
     </string-array>
 
     <string name="pref_title_refresh_news_delay">تأخير وقت تحديث الأخبار</string>
-    <string name="refresh_default_value">60</string>
+    <string name="refresh_default_value">300</string>
     <string-array name="pref_refresh_news_delay_list_titles">
         <item>5 دقائق</item>
         <item>15 دقيقة</item>

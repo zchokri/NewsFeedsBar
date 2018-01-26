@@ -53,6 +53,10 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
         Log.d(TAG_LOG, "lastRefreshDate " + lastRefreshDate);
         Log.d(TAG_LOG, "currentRefreshDate " + currentRefreshDate);
 
+        if(mPrefs.getString("refresh_requested","Yes").contains("Yes")) {
+            force_refresh = true;
+        }
+
         if((currentRefreshDate > (lastRefreshDate + 60000) )|| force_refresh) {
             lastRefreshDate = currentRefreshDate;
 

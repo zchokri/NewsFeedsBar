@@ -76,7 +76,7 @@
     </string-array>
 
     <string name="pref_title_refresh_news_delay">Actualiser les nouvelles</string>
-    <string name="refresh_default_value">60</string>
+    <string name="refresh_default_value">300</string>
     <string-array name="pref_refresh_news_delay_list_titles">
         <item>5 min</item>
         <item>15 min</item>
