@@ -17,6 +17,6 @@ public interface Constants {
     static final String AUTHOR = "author";
     static final String ITEM = "item";
     static final String PUB_DATE = "pubDate";
-    public final static int REQUEST_CODE = -1010101;
+    public final static int REQUEST_CODE = 50;
 
 }
