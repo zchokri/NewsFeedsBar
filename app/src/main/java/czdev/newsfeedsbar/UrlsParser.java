@@ -5,9 +5,6 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.Parser;
-import com.sun.org.apache.xerces.internal.parsers.XMLParser;
-
 import org.w3c.dom.Document;
 
 import java.io.File;

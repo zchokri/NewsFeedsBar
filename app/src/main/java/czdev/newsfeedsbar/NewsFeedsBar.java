@@ -462,7 +462,10 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
     @Override
     protected void onResume() {
-        refreshListNews(true);
+
+        if(mPrefs.getString("refresh_requested","Yes").contains("Yes")) {
+            refreshListNews(true);
+        }
         super.onResume();
 
     }
