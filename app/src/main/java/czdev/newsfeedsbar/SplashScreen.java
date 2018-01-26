@@ -127,6 +127,13 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
             splashActivity = this;
             setContentView(R.layout.activity_splash);
-            startSplashScreen();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Log.v("App","Build Version Greater than or equal to M: "+Build.VERSION_CODES.M);
+                checkDrawOverlayPermission();
+            }else{
+                Log.v("App","OS Version Less than M");
+                //No need for Permission as less then M OS.
+                startSplashScreen();
+            }
         }
     }
