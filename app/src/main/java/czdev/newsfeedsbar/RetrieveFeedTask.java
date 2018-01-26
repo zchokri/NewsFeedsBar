@@ -75,7 +75,7 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
 
     public void readUrls() {
 
-        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
+        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","2"));
         Set<String> resources = defaultSharedPreferences.getStringSet("news_bar_resources", null );
         UrlsParser urlsParser = new UrlsParser(mContext, mLanguageId, resources);
         urlsParser.execute();
