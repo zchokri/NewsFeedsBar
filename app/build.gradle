@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'MyAndroidKey'
+            keyPassword 'atdocVon1'
+            storeFile file('C:/Users/czagroub/android_mykey.jks')
+            storePassword 'atdocVon1'
+        }
+    }
     compileSdkVersion 26
     defaultConfig {
         applicationId "czdev.newsfeedsbar"
@@ -18,13 +26,15 @@ android {
         }
     }
     dexOptions {
-        javaMaxHeapSize "4g"
+        preDexLibraries = false
+        additionalParameters = ['--core-library']
     }
     sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/main/assets/'] } }
     buildToolsVersion '26.0.2'
 }
 
 dependencies {
+    ext.jdkVersion = JavaVersion.current().isJava7() ? 'jdk7' : 'jdk8'
     compile fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.android.support:design:26.1.0'
