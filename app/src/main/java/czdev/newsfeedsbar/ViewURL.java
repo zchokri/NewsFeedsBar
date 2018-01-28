@@ -2,6 +2,7 @@ package czdev.newsfeedsbar;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.view.MenuCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -38,7 +39,8 @@ public class ViewURL extends AppCompatActivity {
 
         Intent myShareIntent = new Intent(Intent.ACTION_SEND);
         myShareIntent.setType("text/plain");
-        myShareIntent.putExtra(Intent.EXTRA_TEXT, link);
+        myShareIntent.putExtra(Intent.EXTRA_TEXT, link +" shared from: "
+                + "https://play.google.com/store/apps/details?id=czdev.newsfeedsbar");
 
         if(myShareActionProvider != null)
         myShareActionProvider.setShareIntent(myShareIntent);
