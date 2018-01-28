@@ -1,8 +1,16 @@
 package czdev.newsfeedsbar;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.support.v4.view.MenuCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebResourceRequest;
@@ -14,12 +22,35 @@ import static czdev.newsfeedsbar.Constants.TAG_LOG;
 public class ViewURL extends AppCompatActivity {
     private float x1,x2;
     static final int MIN_DISTANCE=150;
+    private ShareActionProvider myShareActionProvider;
+    public String link = "";
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate menu resource file.
+        getMenuInflater().inflate(R.menu.share_menu, menu);
+
+        // Locate MenuItem with ShareActionProvider
+        MenuItem shareItem = menu.findItem(R.id.action_share);
+        myShareActionProvider =
+                (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+
+        Intent myShareIntent = new Intent(Intent.ACTION_SEND);
+        myShareIntent.setType("text/plain");
+        myShareIntent.putExtra(Intent.EXTRA_TEXT, link);
+
+        if(myShareActionProvider != null)
+        myShareActionProvider.setShareIntent(myShareIntent);
+
+        // Return true to display menu
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String link = getIntent().getSerializableExtra("link").toString();
+        link = getIntent().getSerializableExtra("link").toString();
         Log.d(TAG_LOG, "link address =  " + link);
         setContentView(R.layout.activity_urlview);
         getWindow().setWindowAnimations(R.style.WindowAnimationTransition);
