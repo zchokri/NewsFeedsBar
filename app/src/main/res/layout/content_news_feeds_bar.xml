@@ -29,15 +29,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <ListView
-        android:id="@+id/listView"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="50dp"
-        android:layout_weight="1"
-        android:divider="#FFFFFF"
-        android:listSelector="@drawable/list_selector"
-        app:layout_constraintTop_toTopOf="@+id/searchView" />
+        <view
+            android:id="@+id/recyclerView"
+            class="android.support.v7.widget.RecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/darker_gray"
+            android:divider="#FFFFFF"
+            app:layout_constraintTop_toTopOf="@+id/searchView"
+            android:layout_centerInParent="true" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
     </RelativeLayout>

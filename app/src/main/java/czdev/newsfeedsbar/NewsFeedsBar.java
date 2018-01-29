@@ -25,7 +25,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -56,7 +60,9 @@ public class NewsFeedsBar extends AppCompatActivity  {
     public Set<String> mRessources = null;
     public static Feed mFeed;
     public static SharedPreferences mPrefs;
-    public static ListView listView = null;
+    private static RecyclerView mRecyclerView;
+    private static CustomListAdapter adapter;
+    private static StaggeredGridLayoutManager staggeredGridLayoutManager;
     public static  Context mContext = null;
     public static SharedPreferences sharedPreferences = null;
     public  static SharedPreferences defaultSharedPreferences = null;
@@ -92,10 +98,9 @@ public class NewsFeedsBar extends AppCompatActivity  {
                         newmFeed.getMessages().add(feedMessage);
                     }
                 }
-                CustomListAdapter customListAdapter = new CustomListAdapter(mContext, newmFeed.getMessages());
-                listView.setAdapter(customListAdapter);
-                customListAdapter.notifyDataSetChanged();
-
+                Log.d(TAG_LOG, "onQueryTextChange " );
+                mRecyclerView.setLayoutManager(staggeredGridLayoutManager);
+                adapter.updateData(newmFeed.getMessages());
                 return false;
             }
            });
@@ -123,56 +128,31 @@ public class NewsFeedsBar extends AppCompatActivity  {
             public void run() {
                 doTheAutoRefresh();
             }
-        }, 5000);
+        }, 300000);
 
         setSupportActionBar(toolbar);
 
         if(mFeed != null) {
 
-            listView.setAdapter(new CustomListAdapter(this, mFeed.getMessages()));
-
+            mRecyclerView.setLayoutManager(staggeredGridLayoutManager);
+            adapter = new CustomListAdapter(mContext, mFeed.getMessages());
+            mRecyclerView.setAdapter(adapter);
+            RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+            itemAnimator.setAddDuration(300);
+            itemAnimator.setRemoveDuration(300);
+            mRecyclerView.setItemAnimator(itemAnimator);
             mRessources = defaultSharedPreferences.getStringSet("news_bar_resources",new HashSet<String>());
             mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
 
             if(mLanguageId == 0)
             {
-                listView.setTextDirection(View.TEXT_DIRECTION_RTL);
-                listView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+                mRecyclerView.setTextDirection(View.TEXT_DIRECTION_RTL);
+                mRecyclerView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
             }else
             {
-                listView.setTextDirection(View.TEXT_DIRECTION_LTR);
-                listView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+                mRecyclerView.setTextDirection(View.TEXT_DIRECTION_LTR);
+                mRecyclerView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
             }
-
-             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Object o = listView.getItemAtPosition(i);
-                    FeedMessage feedMessage = (FeedMessage) o;
-                    Intent ViewIntent = new Intent(mContext, ViewURL.class);
-                    ViewIntent.putExtra("link", feedMessage.getLink());
-                    startActivity(ViewIntent);
-                }
-            });
-
-            listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                                                    @Override
-                                                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-                                                        Object o = listView.getItemAtPosition(position);
-                                                        FeedMessage feedMessage = (FeedMessage) o;
-
-                                                        String res = "Link copied in press-paper";
-                                                        Toast  toast = Toast.makeText(mContext, res, Toast.LENGTH_SHORT);
-                                                        toast.show();
-                                                        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-
-                                                        ClipData clip = ClipData.newPlainText("label", feedMessage.getLink());
-                                                        clipboard.setPrimaryClip(clip);
-                                                        return false;
-                                                    }
-                                                });
-
 
             mBuilder =
                     new NotificationCompat.Builder(this)
@@ -317,9 +297,9 @@ public class NewsFeedsBar extends AppCompatActivity  {
             retrieveFeedTask.readUrls();
             mFeed = retrieveFeedTask.getFeed();
             if (mFeed != null) {
-                CustomListAdapter customListAdapter = new CustomListAdapter(mContext, mFeed.getMessages());
-                listView.setAdapter(customListAdapter);
-                customListAdapter.notifyDataSetChanged();
+                mRecyclerView.setLayoutManager(staggeredGridLayoutManager);
+                adapter.updateData(mFeed.getMessages());
+                Log.d(TAG_LOG, "updateData " );
                 saveCurrentFeeds(mFeed);
                 Toast.makeText(mContext, "News updated ", Toast.LENGTH_LONG).show();
             } else {
@@ -391,7 +371,9 @@ public class NewsFeedsBar extends AppCompatActivity  {
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         component = new ComponentName(mContext, NetworkStateReceiver.class);
         initSharedDefaultValues();
-        listView = (ListView) findViewById(R.id.listView);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        staggeredGridLayoutManager = new StaggeredGridLayoutManager(1,StaggeredGridLayoutManager.VERTICAL);
+        mRecyclerView.setLayoutManager(staggeredGridLayoutManager);
         searchView = (SearchView) findViewById(R.id.searchView);
         searchView.onActionViewExpanded();
         searchView.setIconified(true);
