@@ -98,7 +98,7 @@
 
     <string-array name="pref_new_bar_lang_list_titles">
         <item>Arabic</item>
-        <item>Frensh</item>
+        <item>French</item>
         <item>English</item>
     </string-array>
     <string-array name="pref_new_bar_lang_list_values">
