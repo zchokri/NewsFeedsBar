@@ -23,9 +23,9 @@
     card_view:cardElevation="4dp"
     card_view:contentPadding="5dp"
     app:cardUseCompatPadding="true"
-    app:cardCornerRadius="20dp"
-    app:cardElevation="4dp"
-    app:contentPadding="10dp"
+    app:cardCornerRadius="1dp"
+    app:cardElevation="1dp"
+    app:contentPadding="1dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
@@ -102,8 +102,8 @@
 
         <Button
             android:id="@+id/shareView"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:src="@drawable/share"
             android:background="@drawable/share"
             android:showAsAction="always"
@@ -111,7 +111,6 @@
             android:actionProviderClass="android.support.v7.widget.ShareActionProvider"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/line"
-            android:layout_alignParentBottom="true"
             android:adjustViewBounds="true" />
 
     </RelativeLayout>
