@@ -30,7 +30,9 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import static czdev.newsfeedsbar.Constants.*;
 
@@ -51,7 +53,7 @@ public class MyService extends Service {
     public LinearLayout linearLayout = null;
     public RelativeLayout relativeLayout = null;
     public Button btnResumeNews = null;
-    Feed mFeed;
+    public ArrayList<Feed> mFeed;
     private boolean isPaused = false;
     public int scrollX = 0;
     private int mStartingPosition = 0;
@@ -97,30 +99,23 @@ public class MyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent !=null && intent.getExtras()!=null)
-            mFeed = (Feed) intent.getSerializableExtra("feed_key");
+            mFeed = (ArrayList<Feed>) intent.getSerializableExtra("feed_key");
 
-        if(intent  != null && intent.getAction().toString().equals("reload"))
-        {
-           RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(this,false, true));
-           retrieveFeedTask.readUrls();
-           mFeed = retrieveFeedTask.getFeed();
-
+        if(intent  != null && intent.getAction().toString().equals("reload")) {
+            mFeed = NewsFeedsBar.loadFeed(this, false, true);
         }
 
         if(mFeed == null)
         {
-            mFeed = getSavedFeeds();
+            getSavedFeeds();
         }
         else {
 
             if(SplashScreen.retrieveFeedTask != null) {
-                mFeed = SplashScreen.retrieveFeedTask.getFeed();
+                mFeed = null; //TODO
             }else
             {
-                //force reload
-                RetrieveFeedTask retrieveFeedTask =  (new RetrieveFeedTask(this,false,false));
-                retrieveFeedTask.readUrls();
-                mFeed = retrieveFeedTask.getFeed();
+                mFeed = NewsFeedsBar.loadFeed(this, false, true);
                 saveCurrentFeeds(mFeed);
 
             }
@@ -138,7 +133,7 @@ public class MyService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    public void saveCurrentFeeds(Feed tmpFeed) {
+    public void saveCurrentFeeds(ArrayList<Feed> tmpFeed) {
         mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = mPrefs.edit();
         Gson gson = new Gson();
@@ -148,10 +143,10 @@ public class MyService extends Service {
         Log.v(TAG_LOG,"saveFeed" + tmpFeed.toString());
 
     }
-    public Feed getSavedFeeds() {
-        Feed tmpFeed = null;
+    public ArrayList<Feed> getSavedFeeds() {
+        ArrayList<Feed> tmpFeed = new ArrayList<>();
         mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
-        tmpFeed = new Gson().fromJson(mPrefs.getString("sSavedFeed", null), Feed.class);
+        tmpFeed = new Gson().fromJson(mPrefs.getString("sSavedFeed", null), tmpFeed.getClass());
         Log.v(TAG_LOG,"getSaved" + tmpFeed);
         return tmpFeed;
     }
@@ -235,7 +230,8 @@ public class MyService extends Service {
         }
 
         linearLayout = popupView.findViewById(R.id.linearLayout);
-        for (final FeedMessage message : mFeed.getMessages()) {
+
+        for (final Feed message : mFeed) {
             ImageView imageView = new ImageView(this);
             final TextView textView = new TextView(this);
             if(message.getLink().contains("cnn")) {

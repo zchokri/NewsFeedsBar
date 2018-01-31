@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
@@ -34,11 +35,11 @@ import static czdev.newsfeedsbar.Constants.TAG_LOG;
 
 public class CustomListAdapter  extends RecyclerView.Adapter<CustomListAdapter.CustomViewHolder> {
 
-    private List<FeedMessage> listData;
+    private ArrayList<Feed> listData;
     private LayoutInflater layoutInflater;
     private Context mContext;
 
-    public CustomListAdapter(Context aContext,  List<FeedMessage> listData) {
+    public CustomListAdapter(Context aContext,  ArrayList<Feed> listData) {
         this.mContext = aContext;
         this.listData = listData;
         layoutInflater = LayoutInflater.from(aContext);
@@ -59,13 +60,13 @@ public class CustomListAdapter  extends RecyclerView.Adapter<CustomListAdapter.C
 
     @Override
     public void onBindViewHolder(CustomViewHolder customViewHolder, int position) {
-        FeedMessage feedMessage = listData.get(position);
+        Feed feedMessage = listData.get(position);
 
         // Set selected state; use a state list drawable to style the view
         //Setting text view title
         customViewHolder.titleView.setText(feedMessage.getTitle());
         customViewHolder.descView.setText(feedMessage.getDescription());
-        customViewHolder.pubDateView.setText(feedMessage.getData());
+        customViewHolder.pubDateView.setText(feedMessage.getPubDate().toString());
 
         if(feedMessage.getLink().contains("cnn")) {
             customViewHolder.imageView.setImageResource(R.drawable.cnn2);
@@ -103,7 +104,7 @@ public class CustomListAdapter  extends RecyclerView.Adapter<CustomListAdapter.C
             int position = holder.getLayoutPosition();
             if (position == RecyclerView.NO_POSITION) return;
             // Updating old as well as new positions
-            FeedMessage feedItem = listData.get(position);
+            Feed feedItem = listData.get(position);
             Intent ViewIntent = new Intent(mContext, ViewURL.class);
             ViewIntent.putExtra("link", feedItem.getLink());
             ViewIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
@@ -119,7 +120,7 @@ public class CustomListAdapter  extends RecyclerView.Adapter<CustomListAdapter.C
             int position = holder.getLayoutPosition();
             if (position == RecyclerView.NO_POSITION) return;
             // Updating old as well as new positions
-            FeedMessage feedItem = listData.get(position);
+            Feed feedItem = listData.get(position);
             Intent myShareIntent = new Intent(Intent.ACTION_SEND);
             myShareIntent.setType("text/plain");
             myShareIntent.putExtra(Intent.EXTRA_TEXT, feedItem.getLink() +" shared from: "
@@ -137,7 +138,7 @@ public class CustomListAdapter  extends RecyclerView.Adapter<CustomListAdapter.C
         public boolean onLongClick(View view) {
             CustomViewHolder holder = (CustomViewHolder) view.getTag();
             int position = holder.getLayoutPosition();
-            FeedMessage feedItem = listData.get(position);
+            Feed feedItem = listData.get(position);
             ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("label", feedItem.getLink());
             clipboard.setPrimaryClip(clip);
@@ -148,7 +149,7 @@ public class CustomListAdapter  extends RecyclerView.Adapter<CustomListAdapter.C
         }
     };
 
-    public void updateData(List<FeedMessage> feedMessages) {
+    public void updateData(ArrayList<Feed> feedMessages) {
         Log.d(TAG_LOG, "updateData " );
 
         if (feedMessages != null) {

@@ -10,13 +10,23 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.NetworkOnMainThreadException;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.xml.stream.XMLEventReader;
@@ -25,6 +35,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 import static android.content.Context.MODE_PRIVATE;
 import static czdev.newsfeedsbar.Constants.*;
 
@@ -32,18 +46,24 @@ import static czdev.newsfeedsbar.Constants.*;
 /**
  * Async Task to make http call
  */
-public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
+public class RetrieveFeedTask extends AsyncTask< List<String>, String, List<String>> implements Observer {
 
     public Context mContext = null;
-    private static Feed mFeed;
+    private static ArrayList<Feed> feeds = new ArrayList<>();
+    private XMLParser xmlParser;
     SharedPreferences mPrefs;
     SharedPreferences defaultSharedPreferences;
+    private OnTaskCompleted onComplete;
+
+
     public int mLanguageId = 0;
     Boolean mStartMainActivity = false;
     public  static long lastRefreshDate = new Date(System.currentTimeMillis()).getTime();
     public  static long currentRefreshDate = lastRefreshDate;
 
     public RetrieveFeedTask(Context ctx,boolean startMainActivity, boolean force_refresh)  {
+
+
         this.mContext = ctx;
         this.mStartMainActivity = startMainActivity;
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -71,23 +91,27 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
 
         }
 
+        xmlParser = new XMLParser();
+        xmlParser.addObserver(this);
+
+    }
+    public interface OnTaskCompleted {
+        void onTaskCompleted(ArrayList<Feed> list);
+
+        void onError();
     }
 
-    public void readUrls() {
-
-        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","2"));
-        Set<String> resources = defaultSharedPreferences.getStringSet("news_bar_resources", null );
-        UrlsParser urlsParser = new UrlsParser(mContext, mLanguageId, resources);
-        urlsParser.execute();
-
-        try {
-            execute(urlsParser.get().toArray(new String[urlsParser.get().size()]));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+    public void onFinish(OnTaskCompleted onComplete) {
+        this.onComplete = onComplete;
     }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        feeds = (ArrayList<Feed>) arg;
+        onComplete.onTaskCompleted(feeds);
+    }
+
+
 
     private String getCharacterData(XMLEvent event, XMLEventReader eventReader)
             throws XMLStreamException {
@@ -111,109 +135,52 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
         return Integer.parseInt(day);
     }
 
-    protected Feed doInBackground(String... urls) {
-        try {
-            int news_day = getNewsDaySelected();
-            Feed feed = null;
-            boolean isFeedHeader = true;
-            for (int i = 0; i < urls.length; i++) {
-                //Log.d(TAG_LOG, "url " + i + "   " + urls[i] );
-                URL url = new URL(urls[i]);
-                URLConnection urlCon = url.openConnection();
-                try {
-                    // Set header values intial to the empty string
-                    String description = "";
-                    String title = "";
-                    String link = "";
-                    String language = "";
-                    String author = "";
-                    String pubdate = "";
+    protected List<String> doInBackground(List<String>... urls) {
 
-                    // First create a new XMLInputFactory
-                    XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-                    // Setup a new eventReader
-                    InputStream in = urlCon.getInputStream();
-                    urlCon.setConnectTimeout(5000);
-                    XMLEventReader eventReader = inputFactory.createXMLEventReader(in);
+        Response response = null;
+        List<String> GlobalResponse = new ArrayList<String>();;
+        OkHttpClient client = new OkHttpClient();
 
-                    // read the XML document
-                    while (eventReader.hasNext()) {
-                        XMLEvent event = eventReader.nextEvent();
-                        if (event.isStartElement()) {
-                            String localPart = event.asStartElement().getName()
-                                    .getLocalPart();
-                            switch (localPart) {
-                                case ITEM:
-                                    if (isFeedHeader) {
-                                        isFeedHeader = false;
-                                        feed = new Feed(title, link, description, language, pubdate);
-                                    }
-                                    event = eventReader.nextEvent();
-                                    break;
-                                case TITLE:
-                                    title = getCharacterData(event, eventReader);
-                                    break;
-                                case DESCRIPTION:
-                                    description = getCharacterData(event, eventReader);
-                                    break;
-                                case LINK:
-                                    link = getCharacterData(event, eventReader);
-                                    break;
-                                case LANGUAGE:
-                                    language = getCharacterData(event, eventReader);
-                                    break;
-                                case AUTHOR:
-                                    author = getCharacterData(event, eventReader);
-                                    break;
-                                case PUB_DATE:
-                                    pubdate = getCharacterData(event, eventReader);
-                                    break;
-                            }
-                        } else if (event.isEndElement()) {
-                            if (event.asEndElement().getName().getLocalPart().equals(ITEM) &&
-                                    getDate() - Integer.parseInt(pubdate.split(" ")[1]) <= news_day) {
-                                    FeedMessage message = new FeedMessage();
-                                    message.setAuthor(author);
-                                    message.setDescription(description);
-                                    message.setData(pubdate);
-                                    message.setLink(link);
-                                    message.setTitle(title);
-                                    feed.getMessages().add(message);
-                                    event = eventReader.nextEvent();
-                                    continue;
-                            }
-                        }
-                    }
-                } catch (XMLStreamException | NetworkOnMainThreadException e) {
-                    throw new RuntimeException(e);
-                }
+        int news_day = getNewsDaySelected();
+        Feed feed = null;
+        boolean isFeedHeader = true;
+            Log.i("RSS Parser ", "urls[0].size() " + urls[0].size());
+        for (int i = 0; i < urls[0].size(); i++) {
+            Log.i("tag", "rls[0].get " + i  + "-> "+ urls[0].get(i));
+
+            Request request = new Request.Builder()
+                    .url(urls[0].get(i))
+                    .build();
+
+            try {
+                response = client.newCall(request).execute();
+                if (response.isSuccessful())
+                    GlobalResponse.add(response.body().string());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            return feed;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
         }
-
+        return GlobalResponse;
     }
 
 
-    public Feed getFeed()
-    {
-        try {
-            mFeed = get();
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return mFeed;
-    }
 
     @Override
-    protected void onPostExecute(Feed result) {
+    protected void onPostExecute(List<String> result) {
         super.onPostExecute(result);
+
+        if (result != null) {
+            try {
+                for(String res : result) {
+                    xmlParser.parseXML(res);
+                }
+                Log.i("RSS Parser ", "All RSS parsed correctly!");
+            } catch (Exception e) {
+                e.printStackTrace();
+                onComplete.onError();
+            }
+        } else
+            onComplete.onError();
         // After completing http call
         // will close this activity and lauch main activity
         if(mStartMainActivity) {
@@ -222,5 +189,8 @@ public class RetrieveFeedTask extends AsyncTask< String, String, Feed> {
             mContext.startActivity(i);
         }
     }
+
+
+
 
 }
