@@ -17,13 +17,18 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -47,10 +52,13 @@ import com.wooplr.spotlight.SpotlightConfig;
 import com.wooplr.spotlight.SpotlightView;
 import java.util.HashSet;
 import java.util.Set;
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static czdev.newsfeedsbar.Constants.*;
 
 
-public class NewsFeedsBar extends AppCompatActivity  {
+public class NewsFeedsBar extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener  {
 
     NotificationCompat.Builder mBuilder;
     public static FloatingActionButton fab;
@@ -121,7 +129,6 @@ public class NewsFeedsBar extends AppCompatActivity  {
             mFeed = retrieveFeedTask.getFeed();
             saveCurrentFeeds(mFeed);
         }
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         // refresh handle
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
@@ -129,8 +136,6 @@ public class NewsFeedsBar extends AppCompatActivity  {
                 doTheAutoRefresh();
             }
         }, 300000);
-
-        setSupportActionBar(toolbar);
 
         if(mFeed != null) {
 
@@ -142,7 +147,7 @@ public class NewsFeedsBar extends AppCompatActivity  {
             itemAnimator.setRemoveDuration(300);
             mRecyclerView.setItemAnimator(itemAnimator);
             mRessources = defaultSharedPreferences.getStringSet("news_bar_resources",new HashSet<String>());
-            mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","0"));
+            mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","2"));
 
             if(mLanguageId == 0)
             {
@@ -364,7 +369,20 @@ public class NewsFeedsBar extends AppCompatActivity  {
             }
             SplashScreen.splashActivity.finish();
         }
-        setContentView(R.layout.activity_news_feeds_bar);
+        setContentView(R.layout.main_activity);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
         mContext = getBaseContext();
         newsBarActivity = this;
@@ -415,27 +433,6 @@ public class NewsFeedsBar extends AppCompatActivity  {
         return networkInfo != null && networkInfo.isConnected(); // 3
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_app, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            startActivityForResult(new Intent(NewsFeedsBar.this, SettingsActivity.class),1);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     protected void onDestroy() {
@@ -457,27 +454,14 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
     @Override
     public void onBackPressed() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        int imageResource = android.R.drawable.ic_dialog_alert;
-        Drawable image = getResources().getDrawable(imageResource);
-
-        builder.setTitle("Exit").setMessage("want to exit?").setIcon(image).setCancelable(false).setPositiveButton("yes", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                finish();
-            }
-        }).setNegativeButton("no", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.setCancelable(false);
-        alert.show();
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
+
 
     public void initSharedDefaultValues() {
 
@@ -485,5 +469,45 @@ public class NewsFeedsBar extends AppCompatActivity  {
 
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_manage) {
+           startActivityForResult(new Intent(NewsFeedsBar.this, SettingsActivity.class),1);
+
+        } else if (id == R.id.nav_share) {
+
+            Intent myShareIntent = new Intent(Intent.ACTION_SEND);
+            myShareIntent.setType("text/plain");
+            myShareIntent.putExtra(Intent.EXTRA_TEXT, " News Bar Application : "
+                    + "https://play.google.com/store/apps/details?id=czdev.newsfeedsbar");
+            myShareIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(Intent.createChooser(myShareIntent,"News Bar Share using").setFlags(FLAG_ACTIVITY_NEW_TASK));
+
+        } else if (id == R.id.nav_send) {
+
+            String uriText =
+                    "mailto:" +
+                            "?subject=" + Uri.encode("News Bar Application") +
+                            "&body=" + Uri.encode("Breaking and lastest News, Got it under  https://play.google.com/store/apps/details?id=czdev.newsfeedsbar");
+
+            Uri uri = Uri.parse(uriText);
+
+            Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
+            sendIntent.setData(uri);
+            startActivity(Intent.createChooser(sendIntent, "Send email"));
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
 }
 
