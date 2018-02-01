@@ -4,12 +4,17 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -26,25 +31,27 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import com.google.gson.Gson;
 import com.wooplr.spotlight.SpotlightConfig;
 import com.wooplr.spotlight.SpotlightView;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static czdev.newsfeedsbar.Constants.*;
@@ -57,8 +64,9 @@ public class NewsFeedsBar extends AppCompatActivity
     public static FloatingActionButton fab;
     Animation animSideDown;
     public int  mRefreshDelay = 0;
-    public static int mLanguageId= 0;
+    public int  mLanguageId= 0;
     public Set<String> mRessources = null;
+    public static Feed mFeed;
     public static SharedPreferences mPrefs;
     private static RecyclerView mRecyclerView;
     private static CustomListAdapter adapter;
@@ -74,7 +82,6 @@ public class NewsFeedsBar extends AppCompatActivity
     public static AlertDialog  alertConnection = null;
     public static SwipeRefreshLayout mSwipeRefreshLayout;
     ComponentName component;
-    public static ArrayList<Feed> mFeed;
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -90,25 +97,25 @@ public class NewsFeedsBar extends AppCompatActivity
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                ArrayList<Feed> newmFeed = new ArrayList<>();
+                Feed newmFeed = new Feed("","","","","");
 
-                for (Feed feedMessage : mFeed)
+                for (FeedMessage feedMessage : mFeed.entries)
                 {
                     if (feedMessage.getTitle().toLowerCase().contains(newText.toLowerCase()))
                     {
-                        newmFeed.add(feedMessage);
+                        newmFeed.getMessages().add(feedMessage);
                     }
                 }
                 Log.d(TAG_LOG, "onQueryTextChange " );
                 mRecyclerView.setLayoutManager(staggeredGridLayoutManager);
-                adapter.updateData(newmFeed);
+                adapter.updateData(newmFeed.getMessages());
                 return false;
             }
            });
 
         Log.d(TAG_LOG, "News Bar Running! " + isMyServiceRunning(MyService.class));
         if(SplashScreen.retrieveFeedTask != null) {
-            mFeed = null ;//todo;
+            mFeed = SplashScreen.retrieveFeedTask.getFeed();
         }else
         {
             mFeed = getSavedFeeds();
@@ -117,8 +124,10 @@ public class NewsFeedsBar extends AppCompatActivity
         if(mFeed == null /*get latest news*/)
         {
             //force reload
-            mFeed = loadFeed(mContext, false, true);
-            //saveCurrentFeeds(mFeed.get(0));
+            RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false, false));
+            retrieveFeedTask.readUrls();
+            mFeed = retrieveFeedTask.getFeed();
+            saveCurrentFeeds(mFeed);
         }
         // refresh handle
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
@@ -131,7 +140,7 @@ public class NewsFeedsBar extends AppCompatActivity
         if(mFeed != null) {
 
             mRecyclerView.setLayoutManager(staggeredGridLayoutManager);
-            adapter = new CustomListAdapter(mContext, mFeed);
+            adapter = new CustomListAdapter(mContext, mFeed.getMessages());
             mRecyclerView.setAdapter(adapter);
             RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
             itemAnimator.setAddDuration(300);
@@ -288,12 +297,21 @@ public class NewsFeedsBar extends AppCompatActivity
 
     public static void refreshListNews(boolean force_refresh) {
         //force reload
-        //force reload
+        RetrieveFeedTask retrieveFeedTask = (new RetrieveFeedTask(mContext, false, force_refresh));
         if(mPrefs.getString("refresh_requested","Yes").contains("Yes")) {
-            adapter.updateData(loadFeed(mContext, false, true));
-            adapter.notifyDataSetChanged();
-            mSwipeRefreshLayout.setRefreshing(true);
+            retrieveFeedTask.readUrls();
+            mFeed = retrieveFeedTask.getFeed();
+            if (mFeed != null) {
+                mRecyclerView.setLayoutManager(staggeredGridLayoutManager);
+                adapter.updateData(mFeed.getMessages());
+                Log.d(TAG_LOG, "updateData " );
+                saveCurrentFeeds(mFeed);
+                Toast.makeText(mContext, "News updated ", Toast.LENGTH_LONG).show();
+            } else {
+                alertRequestInternet();
+                Toast.makeText(mContext, "No Internet Connection !  ", Toast.LENGTH_LONG).show();
 
+            }
         }else
         {
             Log.v(TAG_LOG, "refresh_requested => " + mPrefs.getString("refresh_requested","Yes"));
@@ -308,6 +326,7 @@ public class NewsFeedsBar extends AppCompatActivity
 
 
         }
+        mSwipeRefreshLayout.setRefreshing(false);
 
     }
 
@@ -335,10 +354,10 @@ public class NewsFeedsBar extends AppCompatActivity
         }
 
     }
-    public ArrayList getSavedFeeds() {
-        ArrayList<Feed> tmpFeed = null;
+    public Feed getSavedFeeds() {
+        Feed tmpFeed = null;
         mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
-        //tmpFeed = new Gson().fromJson(mPrefs.getString("sSavedFeed", null), ArrayList);
+        tmpFeed = new Gson().fromJson(mPrefs.getString("sSavedFeed", null), Feed.class);
         return tmpFeed;
     }
     @Override
@@ -489,63 +508,6 @@ public class NewsFeedsBar extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    public static ArrayList<Feed> loadFeed(final Context ctx,boolean startMainActivity, boolean force_refresh ) {
-
-
-        RetrieveFeedTask parser = new RetrieveFeedTask(ctx,startMainActivity,force_refresh);
-        List<String>  urlString = readUrls(ctx);
-        parser.execute(urlString);
-        parser.onFinish(new RetrieveFeedTask.OnTaskCompleted() {
-            //what to do when the parsing is done
-            @Override
-            public void onTaskCompleted(ArrayList<Feed> list) {
-                //list is an Array List with all article's information
-                //set the adapter to recycler view
-                adapter = new CustomListAdapter(ctx,list);
-                mFeed = list;
-                for (Feed feedMessage : mFeed) {
-                    Log.i("mFeed", "feedMessage : " + feedMessage.getCategories() + " from " + feedMessage.getLink());
-                }
-                mRecyclerView.setAdapter(adapter);
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-
-            //what to do in case of error
-            @Override
-            public void onError() {
-
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        Toast.makeText(mContext, "Unable to load data.",
-                                Toast.LENGTH_LONG).show();
-                        Log.i("Unable to load ", "articles");
-                    }
-                };
-            }
-        });
-
-        return mFeed;
-    }
-    public static List<String> readUrls(Context ctx) {
-
-        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-        mLanguageId = Integer.parseInt(defaultSharedPreferences.getString("news_bar_lang","2"));
-        Set<String> resources = defaultSharedPreferences.getStringSet("news_bar_resources", null );
-        UrlsParser urlsParser = new UrlsParser(ctx, mLanguageId, resources);
-        urlsParser.execute();
-
-        try {
-            return urlsParser.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }
 

@@ -79,7 +79,11 @@ public class SplashScreen extends AppCompatActivity {
                 @Override
                 public void run() {
                     if(getSavedFeeds() == null && isNetworkConnected()) {
-                        NewsFeedsBar.loadFeed(getBaseContext(), true, true);
+                        retrieveFeedTask = new RetrieveFeedTask(getBaseContext(), true,false);
+                        retrieveFeedTask.readUrls();
+                        if(retrieveFeedTask.getFeed() != null) {
+                            saveCurrentFeeds(retrieveFeedTask.getFeed());
+                        }
                     }else
                     {
                         Intent i = new Intent(getBaseContext(), NewsFeedsBar.class);
@@ -114,7 +118,7 @@ public class SplashScreen extends AppCompatActivity {
         mPrefs = getSharedPreferences(FEED_PREFS_NAME, MODE_PRIVATE);
         tmpFeed = new Gson().fromJson(mPrefs.getString("sSavedFeed", null), Feed.class);
         Log.v(TAG_LOG,"getSaved" + tmpFeed);
-        return null;
+        return tmpFeed;
     }
 
 
